@@ -13,19 +13,62 @@ class OrganStateEnum(Enum):
 
 
 class Organ(Object):
-    wounds = []
-    max_health = 100
-    organ_type = None
-    oxygen_consumption = 0
-    organ_state = OrganStateEnum.Active
+    @property
+    def wounds(self):
+        return self.db.wounds
+
+    @wounds.setter
+    def wounds(self, value):
+        self.db.wounds = value
+
+    @property
+    def max_health(self):
+        return self.db.max_health
+
+    @max_health.setter
+    def max_health(self, value):
+        self.db.max_health = value
+
+    @property
+    def organ_type(self):
+        return self.db.organ_type
+
+    @organ_type.setter
+    def organ_type(self, value):
+        self.db.organ_type = value
+
+    @property
+    def used_by(self):
+        return self.db.used_by
+
+    @used_by.setter
+    def used_by(self, value):
+        self.db.used_by = value
+
+    @property
+    def oxygen_consumption(self):
+        return self.db.oxygen_consumption
+
+    @oxygen_consumption.setter
+    def oxygen_consumption(self, value):
+        self.db.oxygen_consumption = value
+
+    @property
+    def organ_state(self):
+        return self.db.organ_state
+
+    @organ_state.setter
+    def oxygen_consumption(self, value):
+        self.db.organ_state = value
 
     def at_object_creation(self):
         super(Organ, self).at_object_creation()
         self.locks.add("puppet:false();organ:true()")
-        self.db.wounds = self.wounds
+        self.db.wounds = []
         self.db.used_by = None
-        self.db.organ_state = self.organ_state
-        self.db.oxygen_consumption = self.oxygen_consumption
+        self.db.organ_state = OrganStateEnum.Active
+        self.db.oxygen_consumption = 0
+        self.db.max_health = 100
 
         # Set up the timer to call ticks.
         tickerhandler.add(5, self._on_tick)
@@ -69,6 +112,7 @@ class Heart(Organ):
     @property
     def heartrate(self):
         return self.db.heartrate
+
     @heartrate.setter
     def heartrate(self, value):
         self.db.heartrate = value
@@ -119,6 +163,9 @@ class Heart(Organ):
 
 class Lungs(Organ):
     oxygen_input = 28
+
+    def at_object_creation(self):
+        super(Lungs, self).at_object_creation()
 
     def on_tick(self, character):
         average_flow = 5000  # Maybe make max blood ML?

@@ -19,6 +19,7 @@ class SkillEnum(Enum):
     Drive = 4
     ExoticWeapons = 5
     Explosives = 6
+    EVA = 24
     Firearms = 7
     FirstAid = 8
     Forensics = 9

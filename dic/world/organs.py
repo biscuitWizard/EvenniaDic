@@ -32,38 +32,38 @@ class OrganHandler(object):
     def create_starter_organs(self):
         # check if there are organs already present and eat them if possible.
         for content in self.obj.contents:
-            if not content.organ_type:
+            if not hasattr(content, 'organ_type'):
                 continue  # not an organ
-            if not content.used_by:
+            if not hasattr(content, 'used_by'):
                 continue  # not implanted
-            if self.obj.db.organ_slots[content.organ_type]:
+            if content.organ_type in self.obj.db.organ_slots:
                 continue  # already existing organ
             self.obj.db.organ_slots[content.organ_type] = content
 
         # Add some basic organs!
         # Heart? Check.
-        if not self.obj.db.organ_slots[OrganType.Heart]:
+        if OrganType.Heart not in self.obj.db.organ_slots:
             heart = create_object(typeclass='typeclasses.items.organs.Heart',
                                   location=self.obj,
                                   key='Heart')
             heart.db.used_by = self.obj
             self.obj.db.organ_slots[OrganType.Heart] = heart
         # Lungs? Check.
-        if not self.obj.db.organ_slots[OrganType.Lungs]:
+        if OrganType.Lungs not in self.obj.db.organ_slots:
             lungs = create_object(typeclass='typeclasses.items.organs.Lungs',
                                   location=self.obj,
                                   key='Lungs')
             lungs.db.used_by = self.obj
             self.obj.db.organ_slots[OrganType.Lungs] = lungs
         # Brain? Check.
-        if not self.obj.db.organ_slots[OrganType.NervousSystem]:
+        if OrganType.NervousSystem not in self.obj.db.organ_slots:
             brain = create_object(typeclass='typeclasses.items.organs.Brain',
                                   location=self.obj,
                                   key='Brain')
             brain.db.used_by = self.obj
             self.obj.db.organ_slots[OrganType.NervousSystem] = brain
         # Liver? Check.
-        if not self.obj.db.organ_slots[OrganType.Filtration]:
+        if OrganType.Filtration not in self.obj.db.organ_slots:
             liver = create_object(typeclass='typeclasses.items.organs.Liver',
                                   location=self.obj,
                                   key='Liver')

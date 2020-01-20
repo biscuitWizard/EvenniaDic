@@ -60,6 +60,7 @@ class Character(DefaultCharacter):
         self.cmdset.add("commands.chargen.ChargenCmdSet", permanent=True)
 
         self.reset_stats()
+        self.organs.create_starter_organs()
 
     def reset_stats(self):
         self.db.stats = {}
