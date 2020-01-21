@@ -58,7 +58,7 @@ class Organ(Object):
         return self.db.organ_state
 
     @organ_state.setter
-    def oxygen_consumption(self, value):
+    def organ_state(self, value):
         self.db.organ_state = value
 
     def at_object_creation(self):
@@ -117,12 +117,39 @@ class Heart(Organ):
     def heartrate(self, value):
         self.db.heartrate = value
 
+    @property
+    def base_stoke_volume(self):
+        return self.db.base_stoke_volume
+
+    @base_stoke_volume.setter
+    def base_stoke_volume(self, value):
+        self.db.base_stoke_volume = value
+
+    @property
+    def base_resting_heartrate(self):
+        return self.db.base_resting_heartrate
+
+    @base_resting_heartrate.setter
+    def base_resting_heartrate(self, value):
+        self.db.base_resting_heartrate = value
+
+    @property
+    def critical_heartrate(self):
+        return self.db.critical_heartrate
+
+    @critical_heartrate.setter
+    def critical_heartrate(self, value):
+        self.db.critical_heartrate = value
+
     def at_object_creation(self):
         super(Heart, self).at_object_creation()
         self.locks.add("puppet:false();organ:true()")
         self.db.heartrate = 60
         self.db.oxygen_consumption = 4.02
         self.db.organ_type = OrganType.Heart
+        self.db.base_stoke_volume = 70
+        self.db.base_resting_heartrate = 75
+        self.db.critical_heartrate = 200
 
     def on_tick(self, character):
         if self.organ_state == OrganStateEnum.Disabled:
@@ -136,7 +163,7 @@ class Heart(Organ):
 
         cardiac_failure_chance = max(0.0,
                                      self.heartrate
-                                     - 200.0
+                                     - self.db.critical_heartrate
                                      - (character.stats.get_attribute(AttributeEnum.Endurance) / 8))
         if random.randint(1, 100) < cardiac_failure_chance:
             character.msg("Your heart stops! Oh no!")
@@ -154,10 +181,10 @@ class Heart(Organ):
     def get_resting_heartrate(self, character):
         stamina = character.stats.get_attribute(AttributeEnum.Endurance)
 
-        return round(75 - (((stamina - 50) / 100) * 30))
+        return round(self.db.base_resting_heartrate - (((stamina - 50) / 100) * (self.db.base_resting_heartrate / 2)))
 
     def get_flow(self, character):
-        stroke_volume = 70 * (character.db.body.cur_blood / character.db.body.max_blood)
+        stroke_volume = self.db.base_stoke_volume * (character.db.body.cur_blood / character.db.body.max_blood)
         return self.get_heartrate() * stroke_volume
 
 
