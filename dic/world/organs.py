@@ -1,33 +1,33 @@
-from world.stats import AttributeEnum
 from evennia import create_object
-from enum import Enum
-
-
-class OrganType(Enum):
-    Heart = 1,
-    NervousSystem = 2,
-    Lungs = 3,
-    Digestive = 4,
-    Filtration = 5
+from world.enums import *
+from world.content.organs import ORGANS
 
 
 class OrganException(Exception):
     """Base exception class for OrganHandler."""
+
     def __init__(self, msg):
         self.msg = msg
 
 
 class OrganHandler(object):
+    @property
+    def organs(self):
+        return self.obj.db.body["organs"]
+
+    @organs.setter
+    def organs(self, value):
+        self.obj.db.body["organs"] = value
+
     def __init__(self, obj):
         # save the parent typeclass
         self.obj = obj
 
-        #  if not self.obj.db.organ_slots:
-        #      raise OrganException('`OrganHandler` requires `db.organ_slots` attribute on `{}`.'.format(obj))
+        if "organs" not in self.obj.db.body:
+            self.organs = []
 
-        if len(obj.db.organ_slots) == 0:
+        if len(self.organs) == 0:
             self.create_starter_organs()
-        self.organs = obj.db.organ_slots
 
     def create_starter_organs(self):
         # check if there are organs already present and eat them if possible.
@@ -36,43 +36,22 @@ class OrganHandler(object):
                 continue  # not an organ
             if not hasattr(content, 'used_by'):
                 continue  # not implanted
-            if content.organ_type in self.obj.db.organ_slots:
+            if content.organ_type in self.organs:
                 continue  # already existing organ
-            self.obj.db.organ_slots[content.organ_type] = content
+            self.organs[content.organ_type] = content
 
         # Add some basic organs!
-        # Heart? Check.
-        if OrganType.Heart not in self.obj.db.organ_slots:
-            heart = create_object(typeclass='typeclasses.items.organs.Heart',
-                                  location=self.obj,
-                                  key='Heart')
-            heart.db.used_by = self.obj
-            self.obj.db.organ_slots[OrganType.Heart] = heart
-        # Lungs? Check.
-        if OrganType.Lungs not in self.obj.db.organ_slots:
-            lungs = create_object(typeclass='typeclasses.items.organs.Lungs',
-                                  location=self.obj,
-                                  key='Lungs')
-            lungs.db.used_by = self.obj
-            self.obj.db.organ_slots[OrganType.Lungs] = lungs
-        # Brain? Check.
-        if OrganType.NervousSystem not in self.obj.db.organ_slots:
-            brain = create_object(typeclass='typeclasses.items.organs.Brain',
-                                  location=self.obj,
-                                  key='Brain')
-            brain.db.used_by = self.obj
-            self.obj.db.organ_slots[OrganType.NervousSystem] = brain
-        # Liver? Check.
-        if OrganType.Filtration not in self.obj.db.organ_slots:
-            liver = create_object(typeclass='typeclasses.items.organs.Liver',
-                                  location=self.obj,
-                                  key='Liver')
-            liver.db.used_by = self.obj
-            self.obj.db.organ_slots[OrganType.Filtration] = liver
-
-        self.organs = self.obj.db.organ_slots
+        for organKey in self.obj.body.species["organs"]:
+            organ = next((o for o in ORGANS if o["key"] == organKey), None)
+            if not organ:
+                continue
+            organ_obj = create_object(typeclass=organ["typeclass"],
+                                      location=self.obj,
+                                      key=organKey)
+            organ_obj.used_by = self.obj
+            self.organs[organ["type"]] = organ_obj
 
     def find_organ(self, organ_type):
-        if len(self.obj.db.organ_slots) == 0:
+        if len(self.organs) == 0:
             self.create_starter_organs()
         return self.organs[organ_type]

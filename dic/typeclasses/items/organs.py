@@ -2,17 +2,12 @@ from world.organs import OrganType
 from world.stats import AttributeEnum
 from typeclasses.objects import Object
 from evennia import TICKER_HANDLER as tickerhandler
-from typeclasses.items.health import WoundTypeEnum, Wound
-from enum import Enum
+from typeclasses.items.health import Wound
+from world.enums import *
 import random
 
 
-class OrganStateEnum(Enum):
-    Active = 1
-    Disabled = 2
-
-
-class Organ(Object):
+class BodyPart(Object):
     @property
     def wounds(self):
         return self.db.wounds
@@ -30,14 +25,6 @@ class Organ(Object):
         self.db.max_health = value
 
     @property
-    def organ_type(self):
-        return self.db.organ_type
-
-    @organ_type.setter
-    def organ_type(self, value):
-        self.db.organ_type = value
-
-    @property
     def used_by(self):
         return self.db.used_by
 
@@ -46,29 +33,67 @@ class Organ(Object):
         self.db.used_by = value
 
     @property
-    def oxygen_consumption(self):
-        return self.db.oxygen_consumption
+    def resource_consumption(self):
+        return self.db.resource_consumption
 
-    @oxygen_consumption.setter
-    def oxygen_consumption(self, value):
-        self.db.oxygen_consumption = value
+    @resource_consumption.setter
+    def resource_consumption(self, value):
+        self.db.resource_consumption = value
 
     @property
-    def organ_state(self):
-        return self.db.organ_state
+    def resource_generation(self):
+        return self.db.resource_generation
 
-    @organ_state.setter
-    def organ_state(self, value):
-        self.db.organ_state = value
+    @resource_generation.setter
+    def resource_generation(self, value):
+        self.db.resource_generation = value
+
+    @property
+    def resource_storage(self):
+        return self.db.resource_storage
+
+    @resource_storage.setter
+    def resource_storage(self, value):
+        self.db.resource_storage = value
+
+    @property
+    def size(self):
+        return self.db.size
+
+    @size.setter
+    def size(self, value):
+        self.db.size = value
+
+    @property
+    def armor(self):
+        return self.db.armor
+
+    @armor.setter
+    def armor(self, value):
+        self.db.armor = value
+
+    @property
+    def internal_categories(self):
+        return self.db.internal_categories
+
+    @internal_categories.setter
+    def internal_categories(self, value):
+        self.db.internal_categories = value
 
     def at_object_creation(self):
-        super(Organ, self).at_object_creation()
-        self.locks.add("puppet:false();organ:true()")
+        super(BodyPart, self).at_object_creation()
+        self.locks.add("puppet:false()")
         self.db.wounds = []
         self.db.used_by = None
-        self.db.organ_state = OrganStateEnum.Active
-        self.db.oxygen_consumption = 0
         self.db.max_health = 100
+        self.db.size = 0
+
+        self.db.resource_consumption = []
+        self.db.resource_generation = []
+        self.db.resource_storage = []
+
+        self.db.armor = []
+        self.db.internal_categories = []
 
         # Set up the timer to call ticks.
         tickerhandler.add(5, self._on_tick)
@@ -88,24 +113,99 @@ class Organ(Object):
         self.on_tick(self.db.used_by)
 
     def pre_tick(self, character):
-        if self.oxygen_consumption > 0:
-            character.vitals.adjust_blood_oxygen(self.oxygen_consumption * -1)
+        for resource in self.resource_consumption:
+            amount = resource.amount
+            character.body.adjust_resources(resource.key, amount * -1)
+
+        for resource in self.resource_generation:
+            amount = resource.amount * self.get_efficiency()
+            character.body.adjust_resources(resource.key, amount)
 
     def on_tick(self, character):
         pass
 
     def get_efficiency(self):
-        health = sum(map(lambda x: x.severity, self.wounds))
-        return 1 - round(health / self.max_health, 2)
+        damage = self.get_damage()
+        return 1 - round(damage / self.max_health, 2)
 
-    def apply_wound(self, wound):
+    def get_damage(self):
+        return sum(map(lambda x: x.severity, self.wounds))
+
+    def on_death(self):
+        return
+
+    def on_revive(self):
+        return
+
+    def apply_wound(self, wound, bypass_armor=False):
+        if not bypass_armor:
+            # Find an armor value that matches the damage type.
+            armor = next((a for a in self.armor if a.armor_type == wound.wound_type), None)
+            if armor:
+                # We found some armor, so continue calculating.
+                if wound.severity < armor["min_threshold"]:
+                    return  # The armor blocks it completely.
+                elif wound.severity < armor["max_threshold"]:
+                    # The armor reduces the damage to a minimum of 0.
+                    wound.severity -= armor["damage_reduction"]
+                    if wound.severity <= 0:
+                        return  # the damage was reduced completely.
+
         existing = next(wound for wound in self.wounds if wound.wound_type == wound.wound_type)
         if not existing:
             self.wounds.append(wound)
-
-        if wound.wound_type == WoundTypeEnum.Hypoxia:
-            existing.severity += wound.severity
+            if self.get_damage() >= self.max_health:
+                self.on_death()  # check for death
             return
+
+        if wound.wound_type == DamageTypeEnum.Hypoxia:
+            existing.severity += wound.severity
+            if self.get_damage() >= self.max_health:
+                self.on_death()  # check for death
+            return
+
+        # Check to see if we just worsen an existing wound.
+        worsen_chance = existing.severity + 20
+        if random.randint(1, 100) <= worsen_chance:
+            existing.severity += wound.severity
+            if self.get_damage() >= self.max_health:
+                self.on_death()  # check for death
+            return
+
+        # It's a new wound! Yuck!
+        self.wounds.append(wound)
+        if self.get_damage() >= self.max_health:
+            self.on_death()  # check for death
+
+
+class Organ(BodyPart):
+    @property
+    def organ_type(self):
+        return self.db.organ_type
+
+    @organ_type.setter
+    def organ_type(self, value):
+        self.db.organ_type = value
+
+    @property
+    def organ_state(self):
+        return self.db.organ_state
+
+    @organ_state.setter
+    def organ_state(self, value):
+        self.db.organ_state = value
+
+    def at_object_creation(self):
+        super(Organ, self).at_object_creation()
+        self.locks.add("puppet:false();organ:true()")
+        self.db.organ_state = OrganStateEnum.Active
+        self.db.organ_type = None
+
+    def on_death(self):
+        self.db.organ_state = OrganStateEnum.Disabled
+
+    def on_revive(self):
+        self.db.organ_state = OrganStateEnum.Active
 
 
 class Heart(Organ):
@@ -145,7 +245,9 @@ class Heart(Organ):
         super(Heart, self).at_object_creation()
         self.locks.add("puppet:false();organ:true()")
         self.db.heartrate = 60
-        self.db.oxygen_consumption = 4.02
+        self.db.resource_consumption = [
+            {"key": "oxygen", "amount": 4.02}
+        ]
         self.db.organ_type = OrganType.Heart
         self.db.base_stoke_volume = 70
         self.db.base_resting_heartrate = 75
@@ -189,10 +291,12 @@ class Heart(Organ):
 
 
 class Lungs(Organ):
-    oxygen_input = 28
 
     def at_object_creation(self):
         super(Lungs, self).at_object_creation()
+        self.db.resource_generation = [
+            {"key": "oxygen", "amount": 28}
+        ]
 
     def on_tick(self, character):
         average_flow = 5000  # Maybe make max blood ML?
@@ -214,28 +318,24 @@ class Lungs(Organ):
         character.vitals.adjust_blood_oxygen(oxygen)
 
 
-class ConsciousnessState(Enum):
-    Alert = 1,
-    Blackout = 2,
-    Dead = 3
-
-
 class Brain(Organ):
     conciousness = ConsciousnessState.Alert
     organ_type = OrganType.NervousSystem
-    oxygen_consumption = 17.5
 
     def at_object_creation(self):
         super(Brain, self).at_object_creation()
         self.locks.add("puppet:false();organ:true()")
         self.db.conciousness = self.conciousness
+        self.db.resource_consumption = [
+            {"key": "oxygen", "amount": 17.5}
+        ]
 
     def on_tick(self, character):
         oxygenation = character.vitals.get_oxygenation()
         if oxygenation < 0.92:
             damage_rate = 1 - (0.92 / oxygenation)
             damage = 1.2 * damage_rate
-            self.apply_wound(Wound(WoundTypeEnum.Hypoxia, damage))
+            self.apply_wound(Wound(DamageTypeEnum.Hypoxia, damage))
 
         # TODO: Check for neurotoxins and apply additional damage.
 
@@ -254,13 +354,15 @@ class Brain(Organ):
 
 class Liver(Organ):
     speed = 0.5
-    oxygen_consumption = 1.5
     organ_type = OrganType.Filtration
 
     def at_object_creation(self):
         super(Liver, self).at_object_creation()
         self.locks.add("puppet:false();organ:true()")
         self.db.speed = self.speed
+        self.db.resource_consumption = [
+            {"key": "oxygen", "amount": 1.5}
+        ]
 
     def on_tick(self, character):
         reagents = character.vitals.get_blood_contents()
@@ -293,6 +395,9 @@ class Stomach(Organ):
         super(Stomach, self).at_object_creation()
         self.locks.add("puppet:false();organ:true()")
         self.db.contents = self.contents
+        self.db.resource_consumption = [
+            {"key": "oxygen", "amount": 1}
+        ]
 
     def on_tick(self, character):
         for food in self.contents:

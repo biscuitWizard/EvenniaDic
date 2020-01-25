@@ -9,12 +9,11 @@ creation commands.
 """
 from evennia import DefaultCharacter
 from evennia.utils import lazy_property, utils
-from world.organs import OrganHandler
-from world.limbs import LimbHandler
-from world.vitals import VitalsHandler
-from world.stats import StatsHandler, AttributeEnum, SkillEnum
-from typeclasses.items.health import Body
+from world.stats import StatsHandler
+from world.body import BodyHandler
+from world.enums import *
 from commands.health_commands import HealthAdminCmdSet
+from world.content.species import SPECIES_HUMAN
 
 class Character(DefaultCharacter):
     """
@@ -45,11 +44,10 @@ class Character(DefaultCharacter):
         super(Character, self).at_object_creation()
         self.db.race = None
 
-        self.db.organ_slots = {}
         # Core holds information about circulatory systems,
         # pain, etc. It can be considered the "core limb" or body
         # of a creature, and everything requires a body.
-        self.db.body = Body()
+        self.db.body = {}
 
         self.db.position = 'STANDING'
 
@@ -60,34 +58,30 @@ class Character(DefaultCharacter):
         self.cmdset.add("commands.chargen.ChargenCmdSet", permanent=True)
 
         self.reset_stats()
-        self.organs.create_starter_organs()
+        self.apply_species(SPECIES_HUMAN)
 
     def reset_stats(self):
         self.db.stats = {}
-        self.db.body = Body()
 
         for attribute in AttributeEnum:
             self.db.stats[attribute.name] = 20
         for skill in SkillEnum:
             self.db.stats[skill.name] = 0
 
-    @lazy_property
-    def limbs(self):
-        """LimbHandler manages limbs and appendages connected to this Character."""
-        return LimbHandler(self)
+    def apply_species(self, species):
+        # Destroy current body.
+        self.body.destroy()
 
-    @lazy_property
-    def organs(self):
-        """OrganHandler manages vital organs inside this Character."""
-        return OrganHandler(self)
+        # Apply a new species to body.
+        self.body.species = species
 
-    @lazy_property
-    def vitals(self):
-        """Returns common vital sign statistics for this Character."""
-        return VitalsHandler(self)
+        # Initialize new species
+        self.body.organs.create_starter_organs()
 
     @lazy_property
     def stats(self):
         return StatsHandler(self)
 
-    pass
+    @lazy_property
+    def body(self):
+        return BodyHandler(self)

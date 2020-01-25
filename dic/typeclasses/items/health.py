@@ -1,14 +1,4 @@
 import time
-from enum import Enum
-
-
-class WoundTypeEnum(Enum):
-    Blunt = 1
-    Velocity = 2
-    Burn = 3
-    Cut = 4
-    # Special Damage Types
-    Hypoxia = 10
 
 
 class Wound:
@@ -21,12 +11,3 @@ class Wound:
         self.wound_type = wound_type
         self.severity = severity
 
-
-class Body:
-    blood_oxygen = 9999
-    wounds = []
-    max_blood = 5000
-    cur_blood = 5000
-    blood_contents = []
-    temperature = 37.2
-    exertion = 0

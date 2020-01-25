@@ -1,22 +1,38 @@
 
 SPECIES_HUMAN = {
+    "key": "human",
     "title": "Human",
     "is_machine": False,
     "taxonomy": "Homo sapiens",
-    "organs": ["a human heart", "human lungs", "a human brain", "a human stomach", "a human liver"]
+    "blood": {
+        "type": "human blood",
+        "subtypes": ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"],
+        "color": "red",
+        "quantity": 5000,
+        "transport": "oxygenation",
+        "exchange": "oxygen",
+        "exchange_efficiency": 20.1
+    },
+    "body_size": 36,
+    "organs": ["a human heart", "human lungs", "a human stomach", "a human liver"],
+    "limbs": ["a human arm", "a human arm", "a human leg", "a human leg", "a human head"]
 }
 
 SPECIES_ANDROID = {
+    "key": "android",
     "title": "Android",
     "is_machine": True,
     "taxonomy": "Silica sapiens",
+    "body_size": 36,
     "organs": ["a positronic brain", "a mechanical heat-exchanger", "an android power-cell"]
 }
 
 SPECIES_CERATA = {
+    "key": "cerata",
     "title": "Ceratan",
     "is_machine": False,
     "taxonomy": "Ceratarctos scyphephalus",
+    "blood_quantity": 7000,
     "summary": """
         The cerata use siloxane backbones (alternating silicon-oxygen chains), as siloxanes can form a wide variety of 
         polymers. They respire fluorine gas. As such, the cerata are prone 
@@ -51,4 +67,6 @@ SPECIES_CERATA = {
     "organs": ["a ceratan heart", "a ceratan nerve cluster", "a ceratan respiratory tracheae",
                "a ceratan stomach", "a ceratan enzyme bladder"]
 }
+
+SPECIES = [SPECIES_HUMAN, SPECIES_ANDROID, SPECIES_CERATA]
 

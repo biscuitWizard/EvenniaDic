@@ -6,8 +6,11 @@ class Defense(DefaultScript):
     interval = 300  # 5 min repeat
 
     def at_repeat(self):
-        "called every self.interval seconds."
+        """called every self.interval seconds."""
         pass
+
+    def get_footer(self):
+        return "|yYou will automatically +pass in %s minutes.|n" % (self.interval / 60)
 
 
 class GroundMeleeDefense(Defense):
