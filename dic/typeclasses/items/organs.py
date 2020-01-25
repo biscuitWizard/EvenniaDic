@@ -103,7 +103,7 @@ class BodyPart(Object):
         self.db.used_by = None
 
     def _on_tick(self):
-        if not self.db.used_by:
+        if self.db.used_by is None:
             return
         if self.organ_state == OrganStateEnum.Disabled:
             return
@@ -112,12 +112,12 @@ class BodyPart(Object):
 
     def pre_tick(self, character):
         for resource in self.resource_consumption:
-            amount = resource.amount
-            character.body.adjust_resources(resource.key, amount * -1)
+            amount = resource["amount"]
+            character.body.adjust_resources(resource["key"], amount * -1)
 
         for resource in self.resource_generation:
-            amount = resource.amount * self.get_efficiency()
-            character.body.adjust_resources(resource.key, amount)
+            amount = resource["amount"] * self.get_efficiency()
+            character.body.adjust_resources(resource["key"], amount)
 
     def on_tick(self, character):
         pass
@@ -273,9 +273,9 @@ class Heart(Organ):
         return self.db.heartrate
 
     def get_target_heartrate(self, character):
-        exertion = character.vitals.get_exertion()
+        exertion = character.body.get_exertion()
         resting = self.get_resting_heartrate(character)
-        oxygen_deficit = (1 - character.vitals.get_oxygenation()) * 450.0
+        oxygen_deficit = (1 - character.body.get_oxygenation()) * 450.0
         return round(resting * (1 + (3 * exertion))) + oxygen_deficit + random.randint(-2, 2)
 
     def get_resting_heartrate(self, character):
@@ -284,16 +284,42 @@ class Heart(Organ):
         return round(self.db.base_resting_heartrate - (((stamina - 50) / 100) * (self.db.base_resting_heartrate / 2)))
 
     def get_flow(self, character):
-        stroke_volume = self.db.base_stoke_volume * (character.db.body.cur_blood / character.db.body.max_blood)
+        # protection from species not set or divide by 0 errors.
+        if character.body.max_blood_amount < 1:
+            return 0
+
+        stroke_volume = self.db.base_stoke_volume * \
+                        (character.body.current_blood_amount / character.body.max_blood_amount)
         return self.get_heartrate() * stroke_volume
 
 
 class Lungs(Organ):
+    @property
+    def base_exchange_generation(self):
+        return self.db.base_exchange_generation
+
+    @base_exchange_generation.setter
+    def base_exchange_generation(self, value):
+        self.db.base_exchange_generation = value
+
+    @property
+    def exchange_gas(self):
+        return self.db.exchange_gas
+
+    @exchange_gas.setter
+    def exchange_gas(self, value):
+        self.db.exchange_gas = value
 
     def at_object_creation(self):
         super(Lungs, self).at_object_creation()
+
+        if not self.exchange_gas:
+            self.exchange_gas = "oxygen"
+        if not self.base_exchange_generation:
+            self.base_exchange_generation = 28
+
         self.db.resource_generation = [
-            {"key": "oxygen", "amount": 28}
+            {"key": self.exchange_gas, "amount": self.base_exchange_generation}
         ]
 
     def on_tick(self, character):
@@ -301,7 +327,7 @@ class Lungs(Organ):
 
         # Get our pumping-organ thingy. If we have one. If we don't..
         # Well that's rough buddy.
-        heart = character.organs.find_organ(OrganType.Heart)
+        heart = character.body.organs.find_organ(OrganType.Heart)
         if not heart or heart.organ_state == OrganStateEnum.Disabled:
             return  # No oxygen for you...
 
@@ -312,8 +338,13 @@ class Lungs(Organ):
         heart_overdrive = (heart.get_flow(character) - average_flow) / 1000
         efficiency = min(1.1, efficiency + heart_overdrive)
         # Add the oxygen_input (base lung efficiency) to our blood.
-        oxygen = round(self.oxygen_input * efficiency, 2)
-        character.vitals.adjust_blood_oxygen(oxygen)
+        gas = round(self.base_exchange_generation * efficiency, 2)
+
+        resource = next((r for r in self.db.resource_generation if r["key"] == self.exchange_gas), None)
+        if not resource:
+            return
+        # Update the amount generated
+        resource["amount"] = gas
 
 
 class Brain(Organ):
@@ -329,7 +360,7 @@ class Brain(Organ):
         ]
 
     def on_tick(self, character):
-        oxygenation = character.vitals.get_oxygenation()
+        oxygenation = character.body.get_oxygenation()
         if oxygenation < 0.92:
             damage_rate = 1 - (0.92 / oxygenation)
             damage = 1.2 * damage_rate
@@ -363,7 +394,8 @@ class Liver(Organ):
         ]
 
     def on_tick(self, character):
-        reagents = character.vitals.get_blood_contents()
+        return  # debug
+        reagents = character.body.resources
         efficiency = self.get_efficiency()
 
         for reagent in reagents:

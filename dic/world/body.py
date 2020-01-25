@@ -10,7 +10,7 @@ from world.enums import *
 class BodyHandler(object):
     @property
     def resources(self):
-        return self.obj.db.body["resources"]
+        return self.obj.db.body.get("resources", None)
 
     @resources.setter
     def resources(self, value):
@@ -18,7 +18,7 @@ class BodyHandler(object):
 
     @property
     def wounds(self):
-        return self.obj.db.body["wounds"]
+        return self.obj.db.body.get("wounds", None)
 
     @wounds.setter
     def wounds(self, value):
@@ -26,7 +26,7 @@ class BodyHandler(object):
 
     @property
     def current_blood_amount(self):
-        return self.obj.db.body["current_blood_amount"]
+        return self.obj.db.body.get("current_blood_amount", 0)
 
     @current_blood_amount.setter
     def current_blood_amount(self, value):
@@ -44,7 +44,7 @@ class BodyHandler(object):
 
     @property
     def temperature(self):
-        return self.obj.db.body["temperature"]
+        return self.obj.db.body.get("temperature", 0)
 
     @temperature.setter
     def temperature(self, value):
@@ -66,6 +66,9 @@ class BodyHandler(object):
         if not hasattr(self.obj.db, 'body'):
             raise Exception('`BodyHandler` requires `db.body` attribute on `{}`.'.format(obj))
 
+        self.resources = dict()
+        self.wounds = []
+
     # exertion = 0
 
     @lazy_property
@@ -77,6 +80,20 @@ class BodyHandler(object):
     def organs(self):
         """OrganHandler manages vital organs inside this Character."""
         return OrganHandler(self.obj)
+
+    """ Equivalent oxygenation for all species. Will substitute gas as proper. """
+    def get_oxygenation(self):
+        if "blood" not in self.species or "exchange" not in self.species["blood"]:
+            return
+        gas = self.species["blood"]["exchange"]
+        current_gas = self.get_resource(gas)
+        max_gas = self.get_resource_capacity(gas)
+
+        # Protection from species not set or divide by 0 errors.
+        if max_gas < 1:
+            return 0
+
+        return round(current_gas / max_gas, 2)
 
     def get_resource(self, key):
         existing = 0
@@ -151,6 +168,9 @@ class BodyHandler(object):
         if not nervous_system:
             return 0
         return nervous_system.get_efficiency()
+
+    def get_exertion(self):
+        return 0
 
     """ Destroy this current body. """
     def destroy(self):
