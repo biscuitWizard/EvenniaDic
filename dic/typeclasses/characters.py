@@ -47,7 +47,7 @@ class Character(DefaultCharacter):
         # Core holds information about circulatory systems,
         # pain, etc. It can be considered the "core limb" or body
         # of a creature, and everything requires a body.
-        self.db.body = {}
+        self.db.body = dict()
 
         self.db.position = 'STANDING'
 

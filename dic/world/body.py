@@ -1,6 +1,8 @@
 from world.organs import OrganHandler
 from world.limbs import LimbHandler
+from typeclasses.items.organs import BodyPart
 from evennia.utils import lazy_property
+from evennia.utils.utils import inherits_from
 from world.content.species import SPECIES, SPECIES_HUMAN
 from world.enums import *
 
@@ -51,17 +53,17 @@ class BodyHandler(object):
     @property
     def species(self):
         species_key = self.obj.db.body["species"]
-        return next((s for s in SPECIES if s.key == species_key), SPECIES_HUMAN)
+        return next((s for s in SPECIES if s["key"] == species_key), SPECIES_HUMAN)
 
     @species.setter
     def species(self, value):
-        self.obj.db.body["species"] = value.key
+        self.obj.db.body["species"] = value["key"]
 
     def __init__(self, obj):
         # save the parent typeclass
         self.obj = obj
 
-        if not self.obj.db.body:
+        if not hasattr(self.obj.db, 'body'):
             raise Exception('`BodyHandler` requires `db.body` attribute on `{}`.'.format(obj))
 
     # exertion = 0
@@ -101,7 +103,7 @@ class BodyHandler(object):
                 capacity += efficiency * (self.current_blood_amount / 10.0)
 
         for content in self.obj.contents:
-            if not hasattr(content, 'resource_storage'):
+            if not inherits_from(content, BodyPart):
                 continue  # not a body part
             if not hasattr(content, 'used_by'):
                 continue  # not implanted
@@ -115,7 +117,7 @@ class BodyHandler(object):
             capacity = body_part.resource_storage[key]
 
         for content in body_part.contents:
-            if not hasattr(content, 'resource_storage'):
+            if not inherits_from(content, BodyPart):
                 continue  # not a body part
             if not hasattr(content, 'used_by'):
                 continue  # not implanted

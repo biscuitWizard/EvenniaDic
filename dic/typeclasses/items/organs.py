@@ -1,5 +1,3 @@
-from world.organs import OrganType
-from world.stats import AttributeEnum
 from typeclasses.objects import Object
 from evennia import TICKER_HANDLER as tickerhandler
 from typeclasses.items.health import Wound

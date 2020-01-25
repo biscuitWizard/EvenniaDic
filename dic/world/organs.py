@@ -1,4 +1,6 @@
 from evennia import create_object
+from evennia.utils.utils import inherits_from
+from typeclasses.items.organs import Organ
 from world.enums import *
 from world.content.organs import ORGANS
 
@@ -24,7 +26,7 @@ class OrganHandler(object):
         self.obj = obj
 
         if "organs" not in self.obj.db.body:
-            self.organs = []
+            self.organs = dict()
 
         if len(self.organs) == 0:
             self.create_starter_organs()
@@ -32,8 +34,8 @@ class OrganHandler(object):
     def create_starter_organs(self):
         # check if there are organs already present and eat them if possible.
         for content in self.obj.contents:
-            if not hasattr(content, 'organ_type'):
-                continue  # not an organ
+            if not inherits_from(content, Organ):
+                continue
             if not hasattr(content, 'used_by'):
                 continue  # not implanted
             if content.organ_type in self.organs:

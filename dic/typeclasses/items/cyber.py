@@ -1,7 +1,7 @@
-from typeclasses.items.organs import Organ, OrganType
+from typeclasses.items.organs import BodyPart, Organ
 
 
-class Cybernetic(Organ):
+class CyberneticOrgan(Organ):
     @property
     def is_passive(self):
         return self.db.is_passive
@@ -28,11 +28,11 @@ class Cybernetic(Organ):
         pass
 
 
-class CyberBattery(Cybernetic):
+class CyberBattery(CyberneticOrgan):
     """Provides power for other implants."""
     pass
 
 
-class BioReactor(Cybernetic):
+class BioReactor(CyberneticOrgan):
     """Converts a portion of calories into power."""
     pass
