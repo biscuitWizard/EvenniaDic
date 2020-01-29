@@ -42,7 +42,8 @@ PROTOTYPE_MODULES = ["world.prototypes",
                      "world.content.species",
                      "world.content.terms",
                      "world.content.ships",
-                     "world.content.ship_components"
+                     "world.content.ship_components",
+                     "world.content.rooms"
                      ]
 
 ######################################################################

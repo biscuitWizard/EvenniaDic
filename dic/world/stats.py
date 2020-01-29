@@ -7,7 +7,5 @@ class StatsHandler(object):
         self.obj = obj
 
     """ Attributes are 0-100, with 30 being average. """
-    def get_attribute(self, attributeEnum):
+    def get_attribute(self, attribute_enum):
         return 30
-
-    pass

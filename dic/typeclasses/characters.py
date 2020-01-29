@@ -12,12 +12,77 @@ from evennia.utils import lazy_property, utils
 from world.stats import StatsHandler
 from world.body import BodyHandler
 from world.enums import *
+import re
 from commands.admin.character_commands import AdminCharacterCmdSet
 from world.content.species import SPECIES_HUMAN
 from commands.character_general import CharacterGameCmdSet
-from evennia.commands.default.cmdset_character  import CharacterCmdSet
+from evennia.commands.default.cmdset_character import CharacterCmdSet
 
-class Character(DefaultCharacter):
+
+_GENDER_PRONOUN_MAP = {
+    "male": {"s": "he", "o": "him", "p": "his", "a": "his"},
+    "female": {"s": "she", "o": "her", "p": "her", "a": "hers"},
+    "neutral": {"s": "it", "o": "it", "p": "its", "a": "its"},
+    "ambiguous": {"s": "they", "o": "them", "p": "their", "a": "theirs"},
+}
+_RE_GENDER_PRONOUN = re.compile(r"(?<!\|)\|(?!\|)[sSoOpPaA]")
+
+
+class GenderCharacter(DefaultCharacter):
+    """
+    This is a Character class aware of gender.
+    """
+
+    def at_object_creation(self):
+        """
+        Called once when the object is created.
+        """
+        super().at_object_creation()
+        self.db.gender = "ambiguous"
+
+    def _get_pronoun(self, regex_match):
+        """
+        Get pronoun from the pronoun marker in the text. This is used as
+        the callable for the re.sub function.
+        Args:
+            regex_match (MatchObject): the regular expression match.
+        Notes:
+            - `|s`, `|S`: Subjective form: he, she, it, He, She, It, They
+            - `|o`, `|O`: Objective form: him, her, it, Him, Her, It, Them
+            - `|p`, `|P`: Possessive form: his, her, its, His, Her, Its, Their
+            - `|a`, `|A`: Absolute Possessive form: his, hers, its, His, Hers, Its, Theirs
+        """
+        typ = regex_match.group()[1]  # "s", "O" etc
+        gender = self.attributes.get("gender", default="ambiguous")
+        gender = gender if gender in ("male", "female", "neutral") else "ambiguous"
+        pronoun = _GENDER_PRONOUN_MAP[gender][typ.lower()]
+        return pronoun.capitalize() if typ.isupper() else pronoun
+
+    def msg(self, text, from_obj=None, session=None, **kwargs):
+        """
+        Emits something to a session attached to the object.
+        Overloads the default msg() implementation to include
+        gender-aware markers in output.
+        Args:
+            text (str, optional): The message to send
+            from_obj (obj, optional): object that is sending. If
+                given, at_msg_send will be called
+            session (Session or list, optional): session or list of
+                sessions to relay to, if any. If set, will
+                force send regardless of MULTISESSION_MODE.
+        Notes:
+            `at_msg_receive` will be called on this Object.
+            All extra kwargs will be passed on to the protocol.
+        """
+        # pre-process the text before continuing
+        try:
+            text = _RE_GENDER_PRONOUN.sub(self._get_pronoun, text)
+        except TypeError:
+            pass
+        super().msg(text, from_obj=from_obj, session=session, **kwargs)
+
+
+class Character(GenderCharacter):
     """
     The Character defaults to reimplementing some of base Object's hook methods with the
     following functionality:
@@ -37,6 +102,14 @@ class Character(DefaultCharacter):
     at_post_puppet - Echoes "AccountName has entered the game" to the room.
 
     """
+    @lazy_property
+    def stats(self):
+        return StatsHandler(self)
+
+    @lazy_property
+    def body(self):
+        return BodyHandler(self)
+
     """Base character typeclass for DIC.
     This base Character typeclass should only contain things that would be
     common to NPCs, Mobs, Accounts, or anything else built off of it. Flags
@@ -64,6 +137,12 @@ class Character(DefaultCharacter):
 
         self.reset_stats()
         self.apply_species(SPECIES_HUMAN)
+
+    def can_act(self):
+        return True
+
+    def can_move(self):
+        return True
 
     def reset_stats(self):
         self.db.stats = {}
@@ -93,12 +172,3 @@ class Character(DefaultCharacter):
             for resource in species["blood"]["starting_resources"]:
                 self.msg("adding %s" % resource["amount"] + " %s to blood" % resource["key"])
                 self.body.adjust_resources(resource["key"], resource["amount"])
-
-
-    @lazy_property
-    def stats(self):
-        return StatsHandler(self)
-
-    @lazy_property
-    def body(self):
-        return BodyHandler(self)

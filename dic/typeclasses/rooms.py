@@ -9,6 +9,8 @@ from evennia import DefaultRoom
 from evennia import TICKER_HANDLER as tickerhandler
 from world.content.gases import specific_entropy_gas, MINIMUM_TRANSFER_MOLES, R_IDEAL_GAS_EQUATION, MINIMUM_TEMPERATURE_DELTA_TO_CONSIDER
 from utils import engineering
+from evennia.utils.utils import inherits_from
+from typeclasses.exits import Exit
 
 
 class Room(DefaultRoom):
@@ -107,8 +109,20 @@ class SimRoom(Room):
         tickerhandler.add(5, self._on_tick)
 
     def _on_tick(self):
-        #  TODO: For each open exit, equalize gas with adjoined room.
-        pass
+        if self.is_outside:
+            return  # if the room is outside, it has functionally infinite atmo.
+
+        #  For each open exit, equalize gas with adjoined room.
+        exits = filter(lambda r: inherits_from(r, Exit) and r.destination, self.contents)
+        for e in exits:
+            removed_gas = e.destination.pump_gas_passive({
+                "total_moles": self.total_moles,
+                "temperature": self.temperature,
+                "volume": self.volume_litres,
+                "gases": self.atmosphere
+            })
+            self.remove_gas(removed_gas)
+
 
     """
     Generalized scrubber def that 'scrubs/removes' gasses not listed
@@ -155,9 +169,6 @@ class SimRoom(Room):
         atmo_gas["moles"] = max(0, atmo_gas["moles"] + amount)
         if atmo_gas["moles"] == 0:
             self.atmosphere.remove(atmo_gas)
-
-    def equalize_gas_with(self, sink_room):
-        pass
 
     """
     Removes a volume (in litres) of gas from the room. Returns an object with
@@ -246,6 +257,15 @@ class SimRoom(Room):
 
         self.add_gas(removed_gas, max_transfer_moles)
         return 0, removed_gas
+
+    def remove_gas(self, gas_mixture):
+        for gas in gas_mixture["gases"]:
+            existing_gas = next((g for g in self.atmosphere if g["key"] == gas["key"]), None)
+            if existing_gas is None:
+                continue
+            existing_gas["moles"] -= gas["moles"]
+            if existing_gas["moles"] <= 0:
+                self.atmosphere.remove(existing_gas)
 
 
 
