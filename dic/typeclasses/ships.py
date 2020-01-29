@@ -70,6 +70,15 @@ class Ship(Object):
     def adjust_resources(self, key, amount):
         pass
 
+    def can_fly(self):
+        return False
+
+    def can_leave_atmosphere(self):
+        return False
+
+    def can_leave_orbit(self):
+        return False
+
 
 class ShipRoom(SimRoom):
     def at_object_creation(self):

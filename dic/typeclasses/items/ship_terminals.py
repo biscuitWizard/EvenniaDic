@@ -1,7 +1,8 @@
 from typeclasses.items.ship_components import ShipComponent
+from typeclasses.items.terminals import Terminal
 
 
-class ShipTerminal(ShipComponent):
+class ShipTerminal(ShipComponent, Terminal):
     pass
 
 

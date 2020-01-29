@@ -26,7 +26,7 @@ LUNGS_HUMAN = {
     "inhale_volume_per_tick": 0.62,  # Volume in litres of breathed in gas
     "exchange_gas_efficiency": 0.05,  # How much of exchange_gas is processed
     "exhale_gas": "co2",  # Key of gas that's exhaled.
-    "min_breath_pressure": 50,  # In KPA.
+    "min_breath_pressure": 14,  # In KPA.
     "resource_generation": [
         {"key": "oxygen", "amount": 28}
     ]

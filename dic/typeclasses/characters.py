@@ -18,6 +18,15 @@ from commands.admin.character_commands import AdminCharacterCmdSet
 from world.content.species import SPECIES_HUMAN
 from commands.character_general import CharacterGameCmdSet
 from evennia.commands.default.cmdset_character import CharacterCmdSet
+from evennia.utils.utils import (
+    variable_from_module,
+    lazy_property,
+    make_iter,
+    is_iter,
+    list_to_string,
+    to_str,
+)
+from collections import defaultdict
 
 
 _GENDER_PRONOUN_MAP = {
@@ -115,6 +124,19 @@ class Character(GenderCharacter):
     def memories(self):
         return MemoryHandler(self)
 
+    """
+    Whether or not this character is using something. Typically this
+    is like a terminal or something in the room they might be interacting
+    with.
+    """
+    @property
+    def using(self):
+        return self.db.using
+
+    @using.setter
+    def using(self, value):
+        self.db.using = value
+
     """Base character typeclass for DIC.
     This base Character typeclass should only contain things that would be
     common to NPCs, Mobs, Accounts, or anything else built off of it. Flags
@@ -128,6 +150,8 @@ class Character(GenderCharacter):
         # of a creature, and everything requires a body.
         self.db.body = dict()
         self.db.memories = []
+
+        self.using = None
 
         self.db.position = 'STANDING'
 
@@ -149,6 +173,37 @@ class Character(GenderCharacter):
 
     def can_move(self):
         return True
+
+    def at_look(self, target, **kwargs):
+        """
+        Called when this object performs a look. It allows to
+        customize just what this means. It will not itself
+        send any data.
+        Args:
+            target (Object): The target being looked at. This is
+                commonly an object or the current location. It will
+                be checked for the "view" type access.
+            **kwargs (dict): Arbitrary, optional arguments for users
+                overriding the call. This will be passed into
+                return_appearance, get_display_name and at_desc but is not used
+                by default.
+        Returns:
+            lookstring (str): A ready-processed look string
+                potentially ready to return to the looker.
+        """
+        if not target.access(self, "view"):
+            try:
+                return "Could not view '%s'." % target.get_display_name(self, **kwargs)
+            except AttributeError:
+                return "Could not view '%s'." % target.key
+
+        description = target.return_appearance(self, **kwargs)
+
+        # the target's at_desc() method.
+        # this must be the last reference to target so it may delete itself when acted on.
+        target.at_desc(looker=self, **kwargs)
+
+        return description
 
     def reset_stats(self):
         self.db.stats = {}
@@ -178,3 +233,34 @@ class Character(GenderCharacter):
             for resource in species["blood"]["starting_resources"]:
                 self.msg("adding %s" % resource["amount"] + " %s to blood" % resource["key"])
                 self.body.adjust_resources(resource["key"], resource["amount"])
+
+    def return_appearance(self, looker, **kwargs):
+        """
+        This formats a description. It is the hook a 'look' command
+        should call.
+        Args:
+            looker (Object): Object doing the looking.
+            **kwargs (dict): Arbitrary, optional arguments for users
+                overriding the call (unused by default).
+        """
+        if not looker:
+            return ""
+        # get and identify all objects
+        visible = (con for con in self.contents if con != looker and con.access(looker, "view"))
+        exits, users, things = [], [], defaultdict(list)
+        for con in visible:
+            key = con.get_display_name(looker)
+            if con.destination:
+                exits.append(key)
+            elif con.has_account:
+                users.append("|c%s|n" % key)
+            else:
+                # things can be pluralized
+                things[key].append(con)
+        # get description, build string
+        string = "|c%s|n\n" % self.get_display_name(looker)
+        desc = self.db.desc
+        if desc:
+            string += "%s" % desc
+
+        return string

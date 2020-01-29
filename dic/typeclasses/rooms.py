@@ -11,6 +11,15 @@ from world.content.gases import specific_entropy_gas, MINIMUM_TRANSFER_MOLES, R_
 from utils import engineering
 from evennia.utils.utils import inherits_from
 from typeclasses.exits import Exit
+from evennia.utils.utils import (
+    variable_from_module,
+    lazy_property,
+    make_iter,
+    is_iter,
+    list_to_string,
+    to_str,
+)
+from collections import defaultdict
 
 
 class Room(DefaultRoom):
@@ -24,7 +33,38 @@ class Room(DefaultRoom):
     properties and methods available on all Objects.
     """
 
-    pass
+    def return_appearance(self, looker, **kwargs):
+        """
+        This formats a description. It is the hook a 'look' command
+        should call.
+        Args:
+            looker (Object): Object doing the looking.
+            **kwargs (dict): Arbitrary, optional arguments for users
+                overriding the call (unused by default).
+        """
+        if not looker:
+            return ""
+        # get and identify all objects
+        visible = (con for con in self.contents if con != looker and con.access(looker, "view"))
+        exits, users, things = [], [], defaultdict(list)
+        for con in visible:
+            key = con.get_display_name(looker)
+            if con.destination:
+                exits.append(key)
+            elif con.has_account:
+                users.append("|c%s|n" % key)
+            else:
+                # things can be pluralized
+                things[key].append(con)
+        # get description, build string
+        string = "|c%s|n\n" % self.get_display_name(looker)
+        desc = self.db.desc
+        if desc:
+            string += "%s" % desc
+        if exits:
+            string += "\n|wExits:|n " + list_to_string(exits)
+
+        return string
 
 
 class SimRoom(Room):

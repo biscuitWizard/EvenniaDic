@@ -402,14 +402,12 @@ class Lungs(Organ):
             inhale_moles = 0
             if inhale_gas:
                 inhale_moles = inhale_gas["moles"]
-            # self.used_by.msg("inhale moles: %s" % inhale_moles)
-            # self.used_by.msg("total breath moles: %s" % breath["total_moles"])
+
             breath_pressure = moles_to_pressure(breath["total_moles"], breath["temperature"], breath["volume"])
-            # self.used_by.msg("breath pressure: %s" % breath_pressure)
+
             inhale_efficiency = min(round(((inhale_moles / breath["total_moles"]) * breath_pressure)
                                           / self.min_breath_pressure, 3), 3)
 
-            # self.used_by.msg("inhale efficiency: %s" % inhale_efficiency)
             if inhale_efficiency < 1:
                 # Not enough to breathe...
                 if inhale_efficiency >= 0.8:
@@ -420,6 +418,10 @@ class Lungs(Organ):
                     if time.time() - self.last_gasp > 30:
                         self.last_gasp = time.time()
                         self.used_by.msg("You gasp for breath.")
+                        self.used_by.msg("inhale moles: %s" % inhale_moles)
+                        self.used_by.msg("total breath moles: %s" % breath["total_moles"])
+                        self.used_by.msg("breath pressure: %s" % breath_pressure)
+                        self.used_by.msg("inhale efficiency: %s" % inhale_efficiency)
 
             # Now to deal with adding the exhale back in.
             if inhale_gas:
