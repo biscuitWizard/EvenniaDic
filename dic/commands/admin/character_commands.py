@@ -1,8 +1,8 @@
 from evennia import DefaultObject, default_cmds, CmdSet
 
 
-class HealthAdminCmdSet(CmdSet):
-    key = "admin_health_cmdset"
+class AdminCharacterCmdSet(CmdSet):
+    key = "admin_character_cmdset"
     priority = 0
 
     def at_cmdset_creation(self):
@@ -11,7 +11,7 @@ class HealthAdminCmdSet(CmdSet):
 
 
 class CmdSetExertion(default_cmds.MuxCommand):
-    key = "health set exertion"
+    key = "set exertion"
 
     def func(self):
         args = self.args.split(' ')

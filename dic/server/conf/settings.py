@@ -34,6 +34,16 @@ from evennia.settings_default import *
 # This is the name of your game. Make it catchy!
 SERVERNAME = "dic"
 
+# Modules that contain prototypes for use with the spawner mechanism.
+PROTOTYPE_MODULES = ["world.prototypes",
+                     "world.content.limbs",
+                     "world.content.organs",
+                     "world.content.reagents",
+                     "world.content.species",
+                     "world.content.terms",
+                     "world.content.ships",
+                     "world.content.ship_components"
+                     ]
 
 ######################################################################
 # Settings given in secret_settings.py override those in this file.

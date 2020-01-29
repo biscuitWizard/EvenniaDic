@@ -11,9 +11,15 @@ SPECIES_HUMAN = {
         "quantity": 5000,
         "transport": "oxygenation",
         "exchange": "oxygen",
-        "exchange_efficiency": 20.1
+        "exchange_efficiency": 20.1,
+        "starting_resources": [
+            {"key": "oxygen", "amount": 10000}
+        ]
     },
-    "body_size": 36,
+    "armor": [],  # Any natural armors
+    "hypothermic": 34.7,  # Temperature in C before suffering hypothermia.
+    "hyperthermic": 40,  # Temperature in C before suffering hyperthermia.
+    "body_size": 36,  # This is the percentile out of a hundred to hit the body relative to limbs.
     "organs": ["a human heart", "human lungs", "a human stomach", "a human liver"],
     "limbs": ["a human arm", "a human arm", "a human leg", "a human leg", "a human head"]
 }
@@ -23,7 +29,7 @@ SPECIES_ANDROID = {
     "title": "Android",
     "is_machine": True,
     "taxonomy": "Silica sapiens",
-    "body_size": 36,
+    "body_size": 36,  # This is the percentile out of a hundred the body is
     "organs": ["a positronic brain", "a mechanical heat-exchanger", "an android power-cell"]
 }
 

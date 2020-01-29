@@ -159,4 +159,21 @@ class Object(DefaultObject):
 
      """
 
+    @property
+    def is_item(self):
+        return self.db.is_item
+
+    @is_item.setter
+    def is_item(self, value):
+        self.db.is_item = value
+
+    @property
+    def is_hidden(self):
+        return not self.db.is_item
+
+    def at_object_creation(self):
+        super(Object, self).at_object_creation()
+
+        self.is_item = True
+
     pass

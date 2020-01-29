@@ -36,16 +36,14 @@ class CmdScan(default_cmds.MuxCommand):
             return
         # we found a target! we'll do stuff to them.
         response = "=== %s Vitals ===" % target
-        response += "\r\nHeart-rate: %s bpm" % target.vitals.get_bpm()
-        response += "\r\nOxygenation: %s%%" % (target.vitals.get_oxygenation() * 100)
-        response += " (%s" % target.db.body.blood_oxygen
-        response += "/%s)" % ((target.db.body.cur_blood / 10.0) * 20.1)
-        response += "\r\nBrain Activity: %s%%" % (target.vitals.get_brain_activity() * 100)
-        response += "\r\nBlood: %s" % target.db.body.cur_blood
-        response += "/%s mL" % target.db.body.max_blood
-        heart = target.organs.find_organ(OrganType.Heart)
+        response += "\r\nHeart-rate: %s bpm" % target.body.get_bpm()
+        response += "\r\nOxygenation: %s%%" % (target.body.get_oxygenation() * 100)
+        response += "\r\nBrain Activity: %s%%" % (target.body.get_brain_activity() * 100)
+        response += "\r\nBlood: %s" % target.body.current_blood_amount
+        response += "/%s mL" % target.body.max_blood_amount
+        heart = target.body.organs.find_organ(OrganType.Heart)
         response += "\r\nBlood Flow: %s mL/min" % heart.get_flow(target)
-        response += "\r\nBody Temperature: %sc" % target.db.body.temperature
+        response += "\r\nBody Temperature: %sc" % target.body.temperature
         self.caller.msg(response)
         # target.msg("You have been poked by %s." % self.caller)
         # self.caller.msg("You have poked %s." % target)

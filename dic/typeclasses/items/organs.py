@@ -1,8 +1,12 @@
 from typeclasses.objects import Object
 from evennia import TICKER_HANDLER as tickerhandler
+from evennia.utils.utils import inherits_from
 from typeclasses.items.health import Wound
+from typeclasses.rooms import SimRoom
 from world.enums import *
 import random
+import time
+from utils.engineering import moles_to_pressure
 
 
 class BodyPart(Object):
@@ -77,6 +81,10 @@ class BodyPart(Object):
     @internal_categories.setter
     def internal_categories(self, value):
         self.db.internal_categories = value
+
+    @property
+    def is_hidden(self):
+        return self.db.used_by is not None
 
     def at_object_creation(self):
         super(BodyPart, self).at_object_creation()
@@ -310,15 +318,57 @@ class Lungs(Organ):
     def exchange_gas(self, value):
         self.db.exchange_gas = value
 
+    @property
+    def inhale_volume_per_tick(self):
+        return self.db.inhale_volume_per_tick
+
+    @inhale_volume_per_tick.setter
+    def inhale_volume_per_tick(self, value):
+        self.db.inhale_volume_per_tick = value
+
+    @property
+    def exchange_gas_efficiency(self):
+        return self.db.exchange_gas_efficiency
+
+    @exchange_gas_efficiency.setter
+    def exchange_gas_efficiency(self, value):
+        self.db.exchange_gas_efficiency = value
+
+    @property
+    def exhale_gas(self):
+        return self.db.exhale_gas
+
+    @exhale_gas.setter
+    def exhale_gas(self, value):
+        self.db.exhale_gas = value
+
+    @property
+    def min_breath_pressure(self):
+        return self.db.min_breath_pressure
+
+    @min_breath_pressure.setter
+    def min_breath_pressure(self, value):
+        self.db.min_breath_pressure = value
+
+    @property
+    def last_gasp(self):
+        return self.db.last_gasp
+
+    @last_gasp.setter
+    def last_gasp(self, value):
+        self.db.last_gasp = value
+
     def at_object_creation(self):
         super(Lungs, self).at_object_creation()
 
-        if not self.exchange_gas:
-            self.exchange_gas = "oxygen"
-        if not self.base_exchange_generation:
-            self.base_exchange_generation = 28
+        self.exchange_gas = "oxygen"
+        self.base_exchange_generation = 28
+        self.exhale_gas = "co2"
+        self.exchange_gas_efficiency = 0
+        self.inhale_volume_per_tick = 0
+        self.db.last_gasp = 0
 
-        self.db.resource_generation = [
+        self.resource_generation = [
             {"key": self.exchange_gas, "amount": self.base_exchange_generation}
         ]
 
@@ -343,8 +393,55 @@ class Lungs(Organ):
         resource = next((r for r in self.db.resource_generation if r["key"] == self.exchange_gas), None)
         if not resource:
             return
+
+        # Check for the environment for the gas we want!
+        location = self.used_by.location
+        if inherits_from(location, SimRoom):
+            breath = self.get_breath()
+            inhale_gas = next((b for b in breath["gases"] if b["key"] == self.exchange_gas), None)
+            inhale_moles = 0
+            if inhale_gas:
+                inhale_moles = inhale_gas["moles"]
+            breath_pressure = moles_to_pressure(breath["total_moles"], breath["temperature"], breath["volume"])
+            inhale_efficiency = min(round(((inhale_moles / breath["total_moles"]) * breath_pressure)
+                                          / self.min_breath_pressure, 3), 3)
+
+            if inhale_efficiency < 1:
+                # Not enough to breathe...
+                if inhale_efficiency >= 0.8:
+                    # Just enough to draw in a shitty breath.
+                    gas = gas * inhale_efficiency
+                else:
+                    gas = 0
+                    if time.time() - self.last_gasp > 30:
+                        self.last_gasp = time.time()
+                        self.used_by.msg("You gasp for breath.")
+
+            # Now to deal with adding the exhale back in.
+            if inhale_gas:
+                exchanged_moles = inhale_gas["moles"] * self.exchange_gas_efficiency * inhale_efficiency
+                if inhale_efficiency < 0.8:
+                    exchanged_moles = 0
+                inhale_gas["moles"] = inhale_gas["moles"] - exchanged_moles
+                exhale_gas = next((g for g in breath["gases"] if g["key"] == self.exhale_gas), None)
+                if exchanged_moles > 0:
+                    if exhale_gas is None:
+                        exhale_gas = {
+                            "key": self.exhale_gas
+                        }
+                        breath["gases"].append(exhale_gas)
+                    exhale_gas["moles"] = exchanged_moles
+                location.add_gas(breath)
         # Update the amount generated
         resource["amount"] = gas
+
+    def get_breath(self):
+        if self.inhale_volume_per_tick <= 0:
+            return
+        location = self.used_by.location
+        breath = location.remove_volume(self.inhale_volume_per_tick)
+        #  TODO: Maybe some fancy way to handle masks or internal tanks?
+        return breath
 
 
 class Brain(Organ):

@@ -12,8 +12,10 @@ from evennia.utils import lazy_property, utils
 from world.stats import StatsHandler
 from world.body import BodyHandler
 from world.enums import *
-from commands.health_commands import HealthAdminCmdSet
+from commands.admin.character_commands import AdminCharacterCmdSet
 from world.content.species import SPECIES_HUMAN
+from commands.character_general import CharacterGameCmdSet
+from evennia.commands.default.cmdset_character  import CharacterCmdSet
 
 class Character(DefaultCharacter):
     """
@@ -42,7 +44,6 @@ class Character(DefaultCharacter):
     """
     def at_object_creation(self):
         super(Character, self).at_object_creation()
-        self.db.race = None
 
         # Core holds information about circulatory systems,
         # pain, etc. It can be considered the "core limb" or body
@@ -54,8 +55,12 @@ class Character(DefaultCharacter):
         self.db.pose = self.db.pose or self.db.pose_default
         self.db.pose_death = 'lies dead.'
 
-        self.cmdset.add(HealthAdminCmdSet, permanent=True)
-        self.cmdset.add("commands.chargen.ChargenCmdSet", permanent=True)
+        self.cmdset.add(AdminCharacterCmdSet, permanent=True)
+        # self.cmdset.add("commands.chargen.ChargenCmdSet", permanent=True)
+
+        # override default command sets.
+        self.cmdset.remove(CharacterCmdSet)
+        self.cmdset.add(CharacterGameCmdSet, permanent=True)
 
         self.reset_stats()
         self.apply_species(SPECIES_HUMAN)
@@ -69,6 +74,9 @@ class Character(DefaultCharacter):
             self.db.stats[skill.name] = 0
 
     def apply_species(self, species):
+        # if species == self.body.species:
+        #     return  # Nothing to do. Already this species.
+
         # Destroy current body.
         self.body.destroy()
 
@@ -77,6 +85,15 @@ class Character(DefaultCharacter):
 
         # Initialize new species
         self.body.organs.create_starter_organs()
+
+        # Apply starter resources.
+        species = self.body.species
+        self.body.current_blood_amount = self.body.max_blood_amount
+        if "blood" in species and "starting_resources" in species["blood"]:
+            for resource in species["blood"]["starting_resources"]:
+                self.msg("adding %s" % resource["amount"] + " %s to blood" % resource["key"])
+                self.body.adjust_resources(resource["key"], resource["amount"])
+
 
     @lazy_property
     def stats(self):

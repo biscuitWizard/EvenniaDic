@@ -10,7 +10,9 @@ from world.enums import *
 class BodyHandler(object):
     @property
     def resources(self):
-        return self.obj.db.body.get("resources", None)
+        if "resources" not in self.obj.db.body:
+            self.obj.db.body["resources"] = dict()
+        return self.obj.db.body["resources"]
 
     @resources.setter
     def resources(self, value):
@@ -35,9 +37,7 @@ class BodyHandler(object):
     @property
     def max_blood_amount(self):
         species = self.species
-        if "blood" not in species:
-            return 0
-        if "quantity" not in species:
+        if "blood" not in species and "quantity" not in species["blood"]:
             return 0
 
         return species["blood"]["quantity"]
@@ -52,7 +52,7 @@ class BodyHandler(object):
 
     @property
     def species(self):
-        species_key = self.obj.db.body["species"]
+        species_key = self.obj.db.body.get("species", SPECIES_HUMAN["key"])
         return next((s for s in SPECIES if s["key"] == species_key), SPECIES_HUMAN)
 
     @species.setter
@@ -66,7 +66,6 @@ class BodyHandler(object):
         if not hasattr(self.obj.db, 'body'):
             raise Exception('`BodyHandler` requires `db.body` attribute on `{}`.'.format(obj))
 
-        self.resources = dict()
         self.wounds = []
 
     # exertion = 0
@@ -149,7 +148,7 @@ class BodyHandler(object):
         return nervous_system.conciousness != ConsciousnessState.Dead
 
     def has_heartbeat(self):
-        heart = self.obj.organs.find_organ(OrganType.Heart)
+        heart = self.organs.find_organ(OrganType.Heart)
         if not heart:
             return False
         return heart.get_heartrate() > 0
@@ -157,17 +156,18 @@ class BodyHandler(object):
     def get_bpm(self):
         if not self.has_heartbeat():
             return 0
-        heart = self.obj.organs.find_organ(OrganType.Heart)
+        heart = self.organs.find_organ(OrganType.Heart)
         return heart.get_heartrate()
 
     def has_blood(self):
         return self.obj.db.body.cur_blood > 0
 
     def get_brain_activity(self):
-        nervous_system = self.obj.organs.find_organ(OrganType.NervousSystem)
-        if not nervous_system:
-            return 0
-        return nervous_system.get_efficiency()
+        return 1
+        # nervous_system = self.organs.find_organ(OrganType.NervousSystem)
+        # if not nervous_system:
+        #     return 0
+        # return nervous_system.get_efficiency()
 
     def get_exertion(self):
         return 0
