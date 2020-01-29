@@ -11,6 +11,7 @@ from evennia import DefaultCharacter
 from evennia.utils import lazy_property, utils
 from world.stats import StatsHandler
 from world.body import BodyHandler
+from world.memory import MemoryHandler
 from world.enums import *
 import re
 from commands.admin.character_commands import AdminCharacterCmdSet
@@ -110,6 +111,10 @@ class Character(GenderCharacter):
     def body(self):
         return BodyHandler(self)
 
+    @lazy_property
+    def memories(self):
+        return MemoryHandler(self)
+
     """Base character typeclass for DIC.
     This base Character typeclass should only contain things that would be
     common to NPCs, Mobs, Accounts, or anything else built off of it. Flags
@@ -122,6 +127,7 @@ class Character(GenderCharacter):
         # pain, etc. It can be considered the "core limb" or body
         # of a creature, and everything requires a body.
         self.db.body = dict()
+        self.db.memories = []
 
         self.db.position = 'STANDING'
 

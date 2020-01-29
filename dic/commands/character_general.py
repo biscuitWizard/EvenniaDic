@@ -2,6 +2,7 @@ from evennia.commands.cmdset import CmdSet
 from evennia.commands.default import general, help, admin, system
 from evennia.commands.default import building
 from evennia.commands.default import batchprocess
+from world.memory import MemoriesCmd, MemorizeCmd
 
 from django.conf import settings
 from evennia.utils import utils
@@ -94,6 +95,10 @@ class CharacterGameCmdSet(CmdSet):
         # Debug Commands
         self.add(CmdAtmoCheck())
         self.add(CmdEMScan())
+
+        # memories commands
+        self.add(MemoriesCmd())
+        self.add(MemorizeCmd())
 
 
 class CmdEMScan(COMMAND_DEFAULT_CLASS):
