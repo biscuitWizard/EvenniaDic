@@ -7,8 +7,8 @@ Rooms are simple containers that has no location of their own.
 
 from evennia import DefaultRoom
 from evennia import TICKER_HANDLER as tickerhandler
-from world.content.gases import specific_entropy_gas, MINIMUM_TRANSFER_MOLES, R_IDEAL_GAS_EQUATION
-from utils.engineering import moles_to_pressure
+from world.content.gases import specific_entropy_gas, MINIMUM_TRANSFER_MOLES, R_IDEAL_GAS_EQUATION, MINIMUM_TEMPERATURE_DELTA_TO_CONSIDER
+from utils import engineering
 
 
 class Room(DefaultRoom):
@@ -75,7 +75,7 @@ class SimRoom(Room):
     """
     @property
     def pressure(self):
-        return moles_to_pressure(self.total_moles, self.temperature, self.volume_litres)
+        return engineering.moles_to_pressure(self.total_moles, self.temperature, self.volume_litres)
 
     """
     Temperature in Kelvin.
@@ -183,7 +183,24 @@ class SimRoom(Room):
 
         return result
 
-    def add_gas(self, gas_mixture):
+    def add_gas(self, gas_mixture, max_transfer_moles=None):
+        if gas_mixture["total_moles"] < MINIMUM_TRANSFER_MOLES:
+            return -1
+
+        if max_transfer_moles is None:
+            max_transfer_moles = gas_mixture["total_moles"]
+
+        # Equalize temperatures of the gas.
+        if abs(gas_mixture["temperature"] - self.temperature) > MINIMUM_TEMPERATURE_DELTA_TO_CONSIDER:
+            source_heat_capacity = engineering.heat_capacity(gas_mixture["gases"])
+            sink_heat_capacity = engineering.heat_capacity(self.atmosphere)
+            combined_heat_capacity = source_heat_capacity + sink_heat_capacity
+            if combined_heat_capacity > 0:
+                self.temperature = (gas_mixture["temperature"]*source_heat_capacity
+                                    + self.temperature * sink_heat_capacity) \
+                                   / combined_heat_capacity
+
+        # Add gases.
         for gas in gas_mixture["gases"]:
             atmo_gas = next((g for g in self.atmosphere if g["key"] == gas["key"]), None)
             if atmo_gas is None:
@@ -193,6 +210,44 @@ class SimRoom(Room):
                 }
                 self.atmosphere.append(atmo_gas)
             atmo_gas["moles"] += gas["moles"]
+
+    """
+    Adds gas to this room passively based entirely on pressure differences
+    from the source gas_mixture.
+    """
+    def pump_gas_passive(self, gas_mixture, max_transfer_moles=None):
+        if gas_mixture["total_moles"] < MINIMUM_TRANSFER_MOLES:
+            return -1
+
+        if max_transfer_moles is None:
+            max_transfer_moles = gas_mixture["total_moles"]
+        else:
+            max_transfer_moles = min(max_transfer_moles, gas_mixture["total_moles"])
+
+        # Calculate the equalization needed...
+        gas_pressure = engineering.moles_to_pressure(gas_mixture["total_moles"], gas_mixture["temperature"], gas_mixture["volume"])
+        equalize_moles = (gas_pressure - self.pressure)/(R_IDEAL_GAS_EQUATION * (gas_mixture["temperature"]/gas_mixture["volume"] + self.temperature/self.volume_litres))
+        max_transfer_moles = min(max_transfer_moles, equalize_moles)
+
+        if max_transfer_moles < MINIMUM_TRANSFER_MOLES:
+            return -1
+        transfer_ratio = max_transfer_moles / gas_mixture["total_moles"]
+        removed_gas = {
+            "total_moles": max_transfer_moles,
+            "temperature": gas_mixture["temperature"],
+            "volume": gas_mixture["volume"],
+            "gases": []
+        }
+        for gas in gas_mixture["gases"]:
+            removed_gas["gases"].append({
+                "key": gas["key"],
+                "moles": gas["moles"] * transfer_ratio
+            })
+
+        self.add_gas(removed_gas, max_transfer_moles)
+        return 0, removed_gas
+
+
 
 
 

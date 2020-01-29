@@ -2,6 +2,8 @@ from typeclasses.objects import Object
 from typeclasses.rooms import SimRoom
 from evennia import create_object
 
+from typeclasses.items.ship_components import LifeSupport
+
 
 class Ship(Object):
     @property
@@ -55,6 +57,8 @@ class Ship(Object):
         self.is_item = False
 
         self.initialize_cockpit()
+        ls = create_object(LifeSupport, key="Nemesis Life Support", location=self)
+        ls.used_by = self
 
     def initialize_cockpit(self):
         for room in self.rooms:
