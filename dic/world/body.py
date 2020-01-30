@@ -9,6 +9,14 @@ from world.enums import *
 
 class BodyHandler(object):
     @property
+    def original_ego(self):
+        return self.obj.db.body["original_ego"]
+
+    @original_ego.setter
+    def original_ego(self, value):
+        self.obj.db.body["original_ego"] = value
+
+    @property
     def resources(self):
         if "resources" not in self.obj.db.body:
             self.obj.db.body["resources"] = dict()
@@ -65,7 +73,8 @@ class BodyHandler(object):
 
         if not hasattr(self.obj.db, 'body'):
             raise Exception('`BodyHandler` requires `db.body` attribute on `{}`.'.format(obj))
-
+        if "stats" not in self.obj.db.body:
+            self.obj.db.body["stats"] = {}
         self.wounds = []
 
     # exertion = 0
@@ -171,6 +180,11 @@ class BodyHandler(object):
 
     def get_exertion(self):
         return 0
+
+    def get_attribute(self, attribute_enum):
+        if self.obj == self.original_ego:
+            return self.obj.stats.get_raw_attribute(attribute_enum)
+        return self.obj.db.body["stats"].get(attribute_enum, 0)
 
     """ Destroy this current body. """
     def destroy(self):
