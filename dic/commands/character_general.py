@@ -96,6 +96,7 @@ class CharacterGameCmdSet(CmdSet):
         self.add(CmdAtmoCheck())
         self.add(CmdEMScan())
         self.add(CmdStats())
+        self.add(CmdUse())
 
         # memories commands
         self.add(MemoriesCmd())
@@ -208,3 +209,21 @@ class CmdStats(COMMAND_DEFAULT_CLASS):
 
     def func(self):
         self.caller.msg(stats.show(self.caller))
+
+
+class CmdUse(COMMAND_DEFAULT_CLASS):
+    key = "use"
+
+    def func(self):
+        target = self.caller.search(self.args)
+        if not target:
+            # we didn't find anyone, but search has already let the
+            # caller know. We'll just return, since we're done
+            return
+
+        target.used_by = self.caller
+        self.caller.using = target
+
+        self.caller.msg("You begin operating %s." % target.name)
+
+        target.on_begin_use(self.caller)
