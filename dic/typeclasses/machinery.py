@@ -1,5 +1,7 @@
 from typeclasses.objects import Object
+from utils.terminal_menu import TerminalEvMenu
 from evennia.utils.evmenu import EvMenu
+from menus import generic_terminal
 
 
 class Machinery(Object):
@@ -52,16 +54,7 @@ class Terminal(Machinery):
         self.menu_type = ''
 
     def on_begin_use(self, character):
-        EvMenu(character, self.menu_type,
-               startnode="start",
-               cmdset_mergetype="Replace", cmdset_priority=1,
-               auto_quit=True, auto_look=True, auto_help=True,
-               cmd_on_exit="look",
-               persistent=False,
-               startnode_input="",
-               session=None,
-               debug=False,
-               terminal=self)
+        TerminalEvMenu(character, self.menu_type)
 
 
 class GenericTerminal(Terminal):
@@ -83,7 +76,9 @@ class GenericTerminal(Terminal):
 
     def at_object_creation(self):
         super(GenericTerminal, self).at_object_creation()
-        self.files = []
+        self.files = [
+            {"key": "sample_data.nff", "size": 30, "desc": "sample data example"}
+        ]
         self.programs = [
             {"key": "notes", "node": "node_program_notes"},
             {"key": "network", "node": "node_program_network"},
@@ -91,5 +86,5 @@ class GenericTerminal(Terminal):
             {"key": "load disk", "node": "node_program_load_disk"},
             {"key": "terminal", "node": "node_program_terminal"}
         ]
-        self.menu_type = "menus.generic_terminal"
+        self.menu_type = generic_terminal
 
