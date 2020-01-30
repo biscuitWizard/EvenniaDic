@@ -1,6 +1,24 @@
 from enum import Enum
 
 
+def get_attribute_wordlevel(value):
+    levels = 100.0 / len(ATTRIBUTE_WORDLEVELS)
+    index = 0
+    for wordlevel in ATTRIBUTE_WORDLEVELS:
+        if index * levels >= value:
+            return wordlevel
+        index += 1
+
+
+ATTRIBUTE_WORDLEVELS = [
+    "Awful",
+    "Poor",
+    "Average",
+    "Good",
+    "Great",
+    "Post-human"
+]
+
 class DamageTypeEnum(Enum):
     Blunt = 1
     Velocity = 2

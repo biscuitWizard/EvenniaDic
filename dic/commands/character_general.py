@@ -95,6 +95,7 @@ class CharacterGameCmdSet(CmdSet):
         # Debug Commands
         self.add(CmdAtmoCheck())
         self.add(CmdEMScan())
+        self.add(CmdStats())
 
         # memories commands
         self.add(MemoriesCmd())
@@ -199,3 +200,11 @@ class CmdGameInventory(COMMAND_DEFAULT_CLASS):
                 table.add_row("|C%s|n" % item.name, item.db.desc or "")
             string = "|wYou are carrying:\n%s" % table
         self.caller.msg(string)
+
+
+from forms import stats
+class CmdStats(COMMAND_DEFAULT_CLASS):
+    key = "+stats"
+
+    def func(self):
+        self.caller.msg(stats.show(self.caller))
