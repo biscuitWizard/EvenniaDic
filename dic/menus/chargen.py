@@ -2,6 +2,7 @@ from world.stats import AttributeEnum, SkillEnum
 from world.content.terms import TERMS
 import re
 
+
 def start(caller):
     if not caller:
         return
