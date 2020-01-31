@@ -25,7 +25,6 @@
 ###############################################################################
 
 import abc
-import six
 
 from autobahn.util import public
 
@@ -41,8 +40,7 @@ __all__ = (
 
 
 @public
-@six.add_metaclass(abc.ABCMeta)
-class IObjectSerializer(object):
+class IObjectSerializer(abc.ABC):
     """
     Raw Python object serialization and deserialization. Object serializers are
     used by classes implementing WAMP serializers, that is instances of
@@ -85,8 +83,7 @@ class IObjectSerializer(object):
 
 
 @public
-@six.add_metaclass(abc.ABCMeta)
-class ISerializer(object):
+class ISerializer(abc.ABC):
     """
     WAMP message serialization and deserialization.
     """
@@ -137,8 +134,7 @@ class ISerializer(object):
 
 
 @public
-@six.add_metaclass(abc.ABCMeta)
-class IMessage(object):
+class IMessage(abc.ABC):
     """
     """
 
@@ -188,8 +184,7 @@ class IMessage(object):
 
 
 @public
-@six.add_metaclass(abc.ABCMeta)
-class ITransport(object):
+class ITransport(abc.ABC):
     """
     A WAMP transport is a bidirectional, full-duplex, reliable, ordered,
     message-based channel.
@@ -287,8 +282,7 @@ class ITransport(object):
 
 
 @public
-@six.add_metaclass(abc.ABCMeta)
-class ITransportHandler(object):
+class ITransportHandler(abc.ABC):
 
     @public
     @abc.abstractproperty
@@ -335,8 +329,7 @@ class ITransportHandler(object):
 
 
 @public
-@six.add_metaclass(abc.ABCMeta)
-class ISession(object):
+class ISession(abc.ABC):
     """
     Interface for WAMP sessions.
     """
@@ -553,7 +546,7 @@ class ISession(object):
         When the *Caller* and *Dealer* implementations support canceling of calls, the call may
         be canceled by canceling the returned Deferred/Future.
 
-        :param procedure: The URI of the remote procedure to be called, e.g. ``u"com.myapp.hello"``.
+        :param procedure: The URI of the remote procedure to be called, e.g. ``"com.myapp.hello"``.
         :type procedure: unicode
 
         :param args: Any positional arguments for the call.
@@ -634,7 +627,7 @@ class ISession(object):
         - If the publication fails the Deferred/Future will reject with an instance
           of :class:`autobahn.wamp.exception.ApplicationError`.
 
-        :param topic: The URI of the topic to publish to, e.g. ``u"com.myapp.mytopic1"``.
+        :param topic: The URI of the topic to publish to, e.g. ``"com.myapp.mytopic1"``.
         :type topic: unicode
 
         :param args: Arbitrary application payload for the event (positional arguments).
@@ -685,8 +678,7 @@ class ISession(object):
 
 
 # experimental authentication API
-@six.add_metaclass(abc.ABCMeta)
-class IAuthenticator(object):
+class IAuthenticator(abc.ABC):
 
     @abc.abstractmethod
     def on_challenge(self, session, challenge):
@@ -709,8 +701,7 @@ class IAuthenticator(object):
 
 
 @public
-@six.add_metaclass(abc.ABCMeta)
-class IPayloadCodec(object):
+class IPayloadCodec(abc.ABC):
     """
     WAMP payload codecs are used with WAMP payload transparency mode.
 

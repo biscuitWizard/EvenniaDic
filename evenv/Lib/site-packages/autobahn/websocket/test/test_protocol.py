@@ -24,12 +24,11 @@
 #
 ###############################################################################
 
-from __future__ import absolute_import, print_function
-
 import os
 import unittest
 from hashlib import sha1
 from base64 import b64encode
+from unittest.mock import Mock
 
 from autobahn.websocket.protocol import WebSocketServerProtocol
 from autobahn.websocket.protocol import WebSocketServerFactory
@@ -40,8 +39,6 @@ from autobahn.websocket.types import ConnectingRequest
 from autobahn.test import FakeTransport
 
 import txaio
-
-from mock import Mock
 
 
 class WebSocketClientProtocolTests(unittest.TestCase):
@@ -159,7 +156,7 @@ class WebSocketServerProtocolTests(unittest.TestCase):
         """
         sendClose with a str reason works.
         """
-        self.protocol.sendClose(code=1000, reason=u"oh no")
+        self.protocol.sendClose(code=1000, reason="oh no")
 
         # We closed properly
         self.assertEqual(self.transport._written[2:], b"\x03\xe8oh no")
@@ -169,7 +166,7 @@ class WebSocketServerProtocolTests(unittest.TestCase):
         """
         sendClose with a unicode reason works.
         """
-        self.protocol.sendClose(code=1000, reason=u"oh no")
+        self.protocol.sendClose(code=1000, reason="oh no")
 
         # We closed properly
         self.assertEqual(self.transport._written[2:], b"\x03\xe8oh no")
@@ -179,7 +176,7 @@ class WebSocketServerProtocolTests(unittest.TestCase):
         """
         sendClose with a too-long reason will truncate it.
         """
-        self.protocol.sendClose(code=1000, reason=u"abc" * 1000)
+        self.protocol.sendClose(code=1000, reason="abc" * 1000)
 
         # We closed properly
         self.assertEqual(self.transport._written[2:],
@@ -191,7 +188,7 @@ class WebSocketServerProtocolTests(unittest.TestCase):
         Trying to sendClose with a reason but no code will raise an Exception.
         """
         with self.assertRaises(Exception) as e:
-            self.protocol.sendClose(reason=u"abc")
+            self.protocol.sendClose(reason="abc")
 
         self.assertIn("close reason without close code", str(e.exception))
 

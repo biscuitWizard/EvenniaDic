@@ -24,17 +24,8 @@
 #
 ###############################################################################
 
-from __future__ import absolute_import
+import asyncio
 import signal
-
-import six
-
-try:
-    import asyncio
-except ImportError:
-    # Trollius >= 0.3 was renamed to asyncio
-    # noinspection PyUnresolvedReferences
-    import trollius as asyncio
 
 import txaio
 txaio.use_asyncio()  # noqa
@@ -134,8 +125,8 @@ class ApplicationRunner(object):
         :param headers: Additional headers to send (only applies to WAMP-over-WebSocket).
         :type headers: dict
         """
-        assert(type(url) == six.text_type)
-        assert(realm is None or type(realm) == six.text_type)
+        assert(type(url) == str)
+        assert(realm is None or type(realm) == str)
         assert(extra is None or type(extra) == dict)
         assert(headers is None or type(headers) == dict)
         assert(proxy is None or type(proxy) == dict)
@@ -190,7 +181,7 @@ class ApplicationRunner(object):
         else:
             create = make
 
-        if self.url.startswith(u'rs'):
+        if self.url.startswith('rs'):
             # try to parse RawSocket URL ..
             isSecure, host, port = parse_rs_url(self.url)
 

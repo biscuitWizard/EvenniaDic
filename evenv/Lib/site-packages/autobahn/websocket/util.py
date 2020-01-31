@@ -24,27 +24,15 @@
 #
 ###############################################################################
 
-from __future__ import absolute_import
-
 from autobahn.util import public
 
-import six
-from six.moves import urllib
+from urllib import parse as urlparse
 # The Python urlparse module currently does not contain the ws/wss
 # schemes, so we add those dynamically (which is a hack of course).
-# Since the urllib from six.moves does not seem to expose the stuff
-# we monkey patch here, we do it manually.
 #
 # Important: if you change this stuff (you shouldn't), make sure
 # _all_ our unit tests for WS URLs succeed
 #
-if not six.PY3:
-    # Python 2
-    import urlparse
-else:
-    # Python 3
-    from urllib import parse as urlparse
-
 wsschemes = ["ws", "wss"]
 urlparse.uses_relative.extend(wsschemes)
 urlparse.uses_netloc.extend(wsschemes)
@@ -87,38 +75,38 @@ def create_url(hostname, port=None, isSecure=False, path=None, params=None):
     :returns: Constructed WebSocket URL.
     :rtype: str
     """
-    # assert type(hostname) == six.text_type
+    # assert type(hostname) == str
     assert type(isSecure) == bool
 
     if hostname == 'unix':
-        netloc = u"unix:%s" % port
+        netloc = "unix:%s" % port
     else:
-        assert port is None or (type(port) in six.integer_types and port in range(0, 65535))
+        assert port is None or (type(port) == int and port in range(0, 65535))
 
         if port is not None:
-            netloc = u"%s:%d" % (hostname, port)
+            netloc = "%s:%d" % (hostname, port)
         else:
             if isSecure:
-                netloc = u"%s:443" % hostname
+                netloc = "%s:443" % hostname
             else:
-                netloc = u"%s:80" % hostname
+                netloc = "%s:80" % hostname
 
     if isSecure:
-        scheme = u"wss"
+        scheme = "wss"
     else:
-        scheme = u"ws"
+        scheme = "ws"
 
     if path is not None:
-        ppath = urllib.parse.quote(path)
+        ppath = urlparse.quote(path)
     else:
-        ppath = u"/"
+        ppath = "/"
 
     if params is not None:
-        query = urllib.parse.urlencode(params)
+        query = urlparse.urlencode(params)
     else:
         query = None
 
-    return urllib.parse.urlunparse((scheme, netloc, ppath, None, query, None))
+    return urlparse.urlunparse((scheme, netloc, ppath, None, query, None))
 
 
 @public
@@ -159,7 +147,7 @@ def parse_url(url):
 
     if parsed.path is not None and parsed.path != "":
         ppath = parsed.path
-        path = urllib.parse.unquote(ppath)
+        path = urlparse.unquote(ppath)
     else:
         ppath = "/"
         path = ppath
@@ -171,7 +159,7 @@ def parse_url(url):
         resource = ppath
         params = {}
 
-    if parsed.hostname == u"unix":
+    if parsed.hostname == "unix":
         # Unix domain sockets sockets
 
         # ws://unix:/tmp/file.sock => unix:/tmp/file.sock => /tmp/file.sock

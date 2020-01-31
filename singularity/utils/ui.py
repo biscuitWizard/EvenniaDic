@@ -22,7 +22,7 @@ def progress_bar(value, max_value, width=20, display="multicolor"):
         if index / bars >= percentile:
             text += " "
         else:
-            color = get_segment_color(percentile, display)
+            color = get_segment_color(index / bars, display)
             text += "%s|||n" % color
         index += 1
     text += "]"
@@ -31,16 +31,16 @@ def progress_bar(value, max_value, width=20, display="multicolor"):
 
 def get_segment_color(percentile, display):
     if display == "multicolor":
-        if percentile < 0.3:
+        if percentile < 0.2:
             return "|r"
-        elif percentile < 0.6:
+        elif percentile < 0.5:
             return "|y"
         else:
             return "|g"
     elif display == "multicolor-inverse":
-        if percentile < 0.4:
+        if percentile < 0.5:
             return "|g"
-        elif percentile < 0.7:
+        elif percentile < 0.8:
             return "|y"
         else:
             return "|r"

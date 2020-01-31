@@ -1,4 +1,4 @@
-#!c:\dev\dic\evenv\scripts\python.exe
+#!c:\dev\evennia.singularity\evenv\scripts\python.exe
 from django.core import management
 
 if __name__ == "__main__":

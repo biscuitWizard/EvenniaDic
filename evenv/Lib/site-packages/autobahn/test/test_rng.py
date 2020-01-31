@@ -24,8 +24,7 @@
 #
 ###############################################################################
 
-from __future__ import absolute_import
-
+import os
 import sys
 import unittest
 
@@ -36,6 +35,7 @@ from nacl import utils, public
 from autobahn import util
 
 
+@unittest.skipIf('AUTOBAHN_CI_ENABLE_RNG_DEPLETION_TESTS' not in os.environ, 'entropy depletion tests not enabled (env var AUTOBAHN_CI_ENABLE_RNG_DEPLETION_TESTS not set)')
 @unittest.skipIf(not sys.platform.startswith('linux'), 'entropy depletion tests only available on Linux')
 class TestEntropy(unittest.TestCase):
 
@@ -84,7 +84,7 @@ class TestEntropy(unittest.TestCase):
         for k in skeys:
             print('{}: {}'.format(k, res[k]))
 
-        self.assertTrue(skeys[0] > 10)
+        self.assertTrue(skeys[0] > 0)
 
     def test_depleting(self):
         res = {}

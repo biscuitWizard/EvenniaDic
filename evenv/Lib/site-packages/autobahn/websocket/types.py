@@ -24,12 +24,9 @@
 #
 ###############################################################################
 
-from __future__ import absolute_import
-
 from autobahn.util import public
 
 import json
-import six
 
 __all__ = (
     'ConnectionRequest',
@@ -215,7 +212,7 @@ class TransportDetails(object):
         :param dict secure_channel_id: information about our
             channel-binding or None if not using TLS. The only
             channel-binding currently is `tls-unique` so if this is a
-            `dict` it will be: `{u'tls-unique': bytes}`
+            `dict` it will be: `{'tls-unique': bytes}`
         """
         self.peer = peer
         self.is_secure = is_secure
@@ -309,15 +306,15 @@ class ConnectionAccept(object):
             tuple/list.
         :type headers: dict or None
         """
-        assert(subprotocol is None or type(subprotocol) == six.text_type)
+        assert(subprotocol is None or type(subprotocol) == str)
         assert(headers is None or type(headers) == dict)
         if headers is not None:
             for k, v in headers.items():
-                assert(type(k) == six.text_type)
-                assert(type(v) == six.text_type or type(v) == list or type(v) == tuple)
+                assert(type(k) == str)
+                assert(type(v) == str or type(v) == list or type(v) == tuple)
                 if type(v) == list or type(v) == tuple:
                     for vv in v:
-                        assert(type(vv) == six.text_type)
+                        assert(type(vv) == str)
 
         self.subprotocol = subprotocol
         self.headers = headers
@@ -382,7 +379,7 @@ class ConnectionDeny(Exception):
         :type reason: unicode
         """
         assert(type(code) == int)
-        assert(reason is None or type(reason) == six.text_type)
+        assert(reason is None or type(reason) == str)
 
         self.code = code
         self.reason = reason

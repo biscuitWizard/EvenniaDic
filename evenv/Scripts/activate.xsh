@@ -28,7 +28,7 @@ def _deactivate(args):
 _deactivate(["nondestructive"])
 aliases["deactivate"] = _deactivate
 
-$VIRTUAL_ENV = r"C:\Dev\dic\evenv"
+$VIRTUAL_ENV = r"C:\Dev\evennia.singularity\evenv"
 
 $_OLD_VIRTUAL_PATH = $PATH
 $PATH = $PATH[:]

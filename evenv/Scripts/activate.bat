@@ -1,6 +1,6 @@
 @echo off
 
-set "VIRTUAL_ENV=C:\Dev\dic\evenv"
+set "VIRTUAL_ENV=C:\Dev\evennia.singularity\evenv"
 
 if defined _OLD_VIRTUAL_PROMPT (
     set "PROMPT=%_OLD_VIRTUAL_PROMPT%"

@@ -26,9 +26,6 @@
 #
 ###############################################################################
 
-from __future__ import absolute_import
-
-import six
 import struct
 import unittest
 
@@ -265,24 +262,24 @@ class TestNvxUtf8Validator(unittest.TestCase):
         for i in range(
                 0, 0xffff):  # should by 0x10ffff, but non-wide Python build is limited to 16-bits
             if i < 0xD800 or i > 0xDFFF:  # filter surrogate code points, which are disallowed to encode in UTF-8
-                vs.append((True, six.unichr(i).encode("utf-8")))
+                vs.append((True, chr(i).encode("utf-8")))
 
         # FIXME: UnicodeEncodeError: 'utf-8' codec can't encode character '\ud800'
         #        in position 0: surrogates not allowed
         if False:
             # 5.1 Single UTF-16 surrogates
             for i in range(0xD800, 0xDBFF):  # high-surrogate
-                ss = six.unichr(i).encode("utf-8")
+                ss = chr(i).encode("utf-8")
                 vs.append((False, ss))
             for i in range(0xDC00, 0xDFFF):  # low-surrogate
-                ss = six.unichr(i).encode("utf-8")
+                ss = chr(i).encode("utf-8")
                 vs.append((False, ss))
 
             # 5.2 Paired UTF-16 surrogates
             for i in range(0xD800, 0xDBFF):  # high-surrogate
                 for j in range(0xDC00, 0xDFFF):  # low-surrogate
-                    ss1 = six.unichr(i).encode("utf-8")
-                    ss2 = six.unichr(j).encode("utf-8")
+                    ss1 = chr(i).encode("utf-8")
+                    ss2 = chr(j).encode("utf-8")
                     vs.append((False, ss1 + ss2))
                     vs.append((False, ss2 + ss1))
 
@@ -338,7 +335,7 @@ class TestNvxUtf8Validator(unittest.TestCase):
             k = 2
 
         validator.reset()
-        self.assertEqual((True, True, 15, 15)[:k], validator.validate(u'µ@ßöäüàá'.encode('utf8'))[:k])
+        self.assertEqual((True, True, 15, 15)[:k], validator.validate('µ@ßöäüàá'.encode('utf8'))[:k])
 
         validator.reset()
         self.assertEqual((False, False, 0, 0)[:k], validator.validate(b"\xF5")[:k])

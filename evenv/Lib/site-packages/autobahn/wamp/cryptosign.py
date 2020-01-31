@@ -24,13 +24,9 @@
 #
 ###############################################################################
 
-from __future__ import absolute_import
-from __future__ import print_function
-
 import binascii
 import struct
 
-import six
 import txaio
 
 from autobahn import util
@@ -92,7 +88,7 @@ def _read_ssh_ed25519_pubkey(keydata):
     :returns: pair of raw public key (32 bytes) and comment
     :rtype: tuple
     """
-    if type(keydata) != six.text_type:
+    if type(keydata) != str:
         raise Exception("invalid type {} for keydata".format(type(keydata)))
 
     parts = keydata.strip().split()
@@ -100,7 +96,7 @@ def _read_ssh_ed25519_pubkey(keydata):
         raise Exception('invalid SSH Ed25519 public key')
     algo, keydata, comment = parts
 
-    if algo != u'ssh-ed25519':
+    if algo != 'ssh-ed25519':
         raise Exception('not a Ed25519 SSH public key (but {})'.format(algo))
 
     blob = binascii.a2b_base64(keydata)
@@ -178,8 +174,8 @@ def _read_ssh_ed25519_privkey(keydata):
     # https://tools.ietf.org/html/draft-bjh21-ssh-ed25519-02
     # http://blog.oddbit.com/2011/05/08/converting-openssh-public-keys/
 
-    SSH_BEGIN = u'-----BEGIN OPENSSH PRIVATE KEY-----'
-    SSH_END = u'-----END OPENSSH PRIVATE KEY-----'
+    SSH_BEGIN = '-----BEGIN OPENSSH PRIVATE KEY-----'
+    SSH_END = '-----END OPENSSH PRIVATE KEY-----'
     OPENSSH_KEY_V1 = b'openssh-key-v1\0'
 
     if not (keydata.startswith(SSH_BEGIN) and keydata.endswith(SSH_END)):
@@ -187,7 +183,7 @@ def _read_ssh_ed25519_privkey(keydata):
 
     ssh_end = keydata.find(SSH_END)
     keydata = keydata[len(SSH_BEGIN):ssh_end]
-    keydata = u''.join([x.strip() for x in keydata.split()])
+    keydata = ''.join([x.strip() for x in keydata.split()])
     blob = binascii.a2b_base64(keydata)
 
     blob = blob[len(OPENSSH_KEY_V1):]
@@ -373,7 +369,7 @@ if HAS_CRYPTOSIGN:
             if not (isinstance(key, signing.VerifyKey) or isinstance(key, signing.SigningKey)):
                 raise Exception("invalid type {} for key".format(type(key)))
 
-            if not (comment is None or type(comment) == six.text_type):
+            if not (comment is None or type(comment) == str):
                 raise Exception("invalid type {} for comment".format(type(comment)))
 
             self._key = key
@@ -381,8 +377,8 @@ if HAS_CRYPTOSIGN:
             self._can_sign = isinstance(key, signing.SigningKey)
 
         def __str__(self):
-            comment = u'"{}"'.format(self.comment()) if self.comment() else None
-            return u'Key(can_sign={}, comment={}, public_key={})'.format(self.can_sign(), comment, self.public_key())
+            comment = '"{}"'.format(self.comment()) if self.comment() else None
+            return 'Key(can_sign={}, comment={}, public_key={})'.format(self.can_sign(), comment, self.public_key())
 
         @util.public
         def can_sign(self):
@@ -436,7 +432,7 @@ if HAS_CRYPTOSIGN:
             if not self._can_sign:
                 raise Exception("a signing key required to sign")
 
-            if type(data) != six.binary_type:
+            if type(data) != bytes:
                 raise Exception("data to be signed must be binary")
 
             # sig is a nacl.signing.SignedMessage
@@ -463,19 +459,19 @@ if HAS_CRYPTOSIGN:
             :rtype: str
             """
             if not isinstance(challenge, Challenge):
-                raise Exception(u"challenge must be instance of autobahn.wamp.types.Challenge, not {}".format(type(challenge)))
+                raise Exception("challenge must be instance of autobahn.wamp.types.Challenge, not {}".format(type(challenge)))
 
-            if u'challenge' not in challenge.extra:
-                raise Exception(u"missing challenge value in challenge.extra")
+            if 'challenge' not in challenge.extra:
+                raise Exception("missing challenge value in challenge.extra")
 
             # the challenge sent by the router (a 32 bytes random value)
-            challenge_hex = challenge.extra[u'challenge']
+            challenge_hex = challenge.extra['challenge']
 
-            if type(challenge_hex) != six.text_type:
-                raise Exception(u"invalid type {} for challenge (expected a hex string)".format(type(challenge_hex)))
+            if type(challenge_hex) != str:
+                raise Exception("invalid type {} for challenge (expected a hex string)".format(type(challenge_hex)))
 
             if len(challenge_hex) != 64:
-                raise Exception(u"unexpected challenge (hex) length: was {}, but expected 64".format(len(challenge_hex)))
+                raise Exception("unexpected challenge (hex) length: was {}, but expected 64".format(len(challenge_hex)))
 
             # the challenge for WAMP-cryptosign is a 32 bytes random value in Hex encoding (that is, a unicode string)
             challenge_raw = binascii.a2b_hex(challenge_hex)
@@ -513,10 +509,10 @@ if HAS_CRYPTOSIGN:
         @util.public
         @classmethod
         def from_key_bytes(cls, keydata, comment=None):
-            if not (comment is None or type(comment) == six.text_type):
+            if not (comment is None or type(comment) == str):
                 raise ValueError("invalid type {} for comment".format(type(comment)))
 
-            if type(keydata) != six.binary_type:
+            if type(keydata) != bytes:
                 raise ValueError("invalid key type {} (expected binary)".format(type(keydata)))
 
             if len(keydata) != 32:
@@ -542,10 +538,10 @@ if HAS_CRYPTOSIGN:
             :param comment: Comment for key (optional).
             :type comment: str or None
             """
-            if not (comment is None or type(comment) == six.text_type):
+            if not (comment is None or type(comment) == str):
                 raise Exception("invalid type {} for comment".format(type(comment)))
 
-            if type(filename) != six.text_type:
+            if type(filename) != str:
                 raise Exception("invalid type {} for filename".format(filename))
 
             with open(filename, 'rb') as f:
@@ -574,7 +570,7 @@ if HAS_CRYPTOSIGN:
             key (from a SSH private key file) or a (public) verification key (from a SSH
             public key file). A private key file must be passphrase-less.
             """
-            SSH_BEGIN = u'-----BEGIN OPENSSH PRIVATE KEY-----'
+            SSH_BEGIN = '-----BEGIN OPENSSH PRIVATE KEY-----'
             if keydata.startswith(SSH_BEGIN):
                 # OpenSSH private key
                 keydata, comment = _read_ssh_ed25519_privkey(keydata)

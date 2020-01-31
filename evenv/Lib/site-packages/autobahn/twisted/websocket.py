@@ -24,10 +24,7 @@
 #
 ###############################################################################
 
-from __future__ import absolute_import
-
 from base64 import b64encode, b64decode
-import six
 
 from zope.interface import implementer
 
@@ -95,7 +92,7 @@ def check_transport_config(transport_config):
     raises a ValueError if `transport_config` is invalid
     """
     # XXX move me to "autobahn.websocket.util"
-    if not isinstance(transport_config, six.text_type):
+    if not isinstance(transport_config, str):
         raise ValueError(
             "'transport_config' must be a string, found {}".format(type(transport_config))
         )
@@ -151,8 +148,8 @@ def _endpoint_from_config(reactor, factory, transport_config, options):
         factory.contextFactory = context_factory
         endpoint = endpoints.HostnameEndpoint(
             reactor,
-            factory.proxy[u'host'],
-            factory.proxy[u'port'],
+            factory.proxy['host'],
+            factory.proxy['port'],
             # timeout,  option?
         )
     else:
@@ -236,7 +233,7 @@ class WebSocketAdapterProtocol(twisted.internet.protocol.Protocol):
     Adapter class for Twisted WebSocket client and server protocols.
     """
 
-    peer = u'<never connected>'
+    peer = '<never connected>'
 
     log = txaio.make_logger()
 
@@ -246,7 +243,7 @@ class WebSocketAdapterProtocol(twisted.internet.protocol.Protocol):
             self.peer = peer2str(self.transport.getPeer())
         except AttributeError:
             # ProcessProtocols lack getPeer()
-            self.peer = u'process:{}'.format(self.transport.pid)
+            self.peer = 'process:{}'.format(self.transport.pid)
 
         self._connectionMade()
         self.log.debug('Connection made to {peer}', peer=self.peer)
@@ -358,7 +355,7 @@ class WebSocketServerProtocol(WebSocketAdapterProtocol, protocol.WebSocketServer
 
     log = txaio.make_logger()
 
-    def get_channel_id(self, channel_id_type=u'tls-unique'):
+    def get_channel_id(self, channel_id_type='tls-unique'):
         """
         Implements :func:`autobahn.wamp.interfaces.ITransport.get_channel_id`
         """
@@ -382,7 +379,7 @@ class WebSocketClientProtocol(WebSocketAdapterProtocol, protocol.WebSocketClient
         self.log.debug("Starting TLS upgrade")
         self.transport.startTLS(self.factory.contextFactory)
 
-    def get_channel_id(self, channel_id_type=u'tls-unique'):
+    def get_channel_id(self, channel_id_type='tls-unique'):
         """
         Implements :func:`autobahn.wamp.interfaces.ITransport.get_channel_id`
         """
@@ -402,7 +399,7 @@ class WebSocketClientProtocol(WebSocketAdapterProtocol, protocol.WebSocketClient
         is_secure = ISSLTransport.providedBy(self.transport)
         if is_secure:
             secure_channel_id = {
-                u'tls-unique': transport_channel_id(self.transport, False, u'tls-unique'),
+                'tls-unique': transport_channel_id(self.transport, False, 'tls-unique'),
             }
         else:
             secure_channel_id = {}
@@ -508,14 +505,14 @@ class WrappingWebSocketAdapter(object):
             request = requestOrResponse
             for p in request.protocols:
                 if p in self.factory._subprotocols:
-                    self._binaryMode = (p != u'base64')
+                    self._binaryMode = (p != 'base64')
                     return p
-            raise ConnectionDeny(ConnectionDeny.NOT_ACCEPTABLE, u'this server only speaks {0} WebSocket subprotocols'.format(self.factory._subprotocols))
+            raise ConnectionDeny(ConnectionDeny.NOT_ACCEPTABLE, 'this server only speaks {0} WebSocket subprotocols'.format(self.factory._subprotocols))
         elif isinstance(requestOrResponse, ConnectionResponse):
             response = requestOrResponse
             if response.protocol not in self.factory._subprotocols:
-                self._fail_connection(protocol.WebSocketProtocol.CLOSE_STATUS_CODE_PROTOCOL_ERROR, u'this client only speaks {0} WebSocket subprotocols'.format(self.factory._subprotocols))
-            self._binaryMode = (response.protocol != u'base64')
+                self._fail_connection(protocol.WebSocketProtocol.CLOSE_STATUS_CODE_PROTOCOL_ERROR, 'this client only speaks {0} WebSocket subprotocols'.format(self.factory._subprotocols))
+            self._binaryMode = (response.protocol != 'base64')
         else:
             # should not arrive here
             raise Exception("logic error")
@@ -525,13 +522,13 @@ class WrappingWebSocketAdapter(object):
 
     def onMessage(self, payload, isBinary):
         if isBinary != self._binaryMode:
-            self._fail_connection(protocol.WebSocketProtocol.CLOSE_STATUS_CODE_UNSUPPORTED_DATA, u'message payload type does not match the negotiated subprotocol')
+            self._fail_connection(protocol.WebSocketProtocol.CLOSE_STATUS_CODE_UNSUPPORTED_DATA, 'message payload type does not match the negotiated subprotocol')
         else:
             if not isBinary:
                 try:
                     payload = b64decode(payload)
                 except Exception as e:
-                    self._fail_connection(protocol.WebSocketProtocol.CLOSE_STATUS_CODE_INVALID_PAYLOAD, u'message payload base64 decoding error: {0}'.format(e))
+                    self._fail_connection(protocol.WebSocketProtocol.CLOSE_STATUS_CODE_INVALID_PAYLOAD, 'message payload base64 decoding error: {0}'.format(e))
             self._proto.dataReceived(payload)
 
     # noinspection PyUnusedLocal
@@ -597,7 +594,7 @@ class WrappingWebSocketServerFactory(WebSocketServerFactory):
         :type url: unicode
         """
         self._factory = factory
-        self._subprotocols = [u'binary', u'base64']
+        self._subprotocols = ['binary', 'base64']
         if subprotocol:
             self._subprotocols.append(subprotocol)
 
@@ -660,7 +657,7 @@ class WrappingWebSocketClientFactory(WebSocketClientFactory):
         :type url: unicode
         """
         self._factory = factory
-        self._subprotocols = [u'binary', u'base64']
+        self._subprotocols = ['binary', 'base64']
         if subprotocol:
             self._subprotocols.append(subprotocol)
 
@@ -733,7 +730,7 @@ def connectWS(factory, contextFactory=None, timeout=30, bindAddress=None):
 
     if factory.proxy is not None:
         factory.contextFactory = contextFactory
-        conn = reactor.connectTCP(factory.proxy[u'host'], factory.proxy[u'port'], factory, timeout, bindAddress)
+        conn = reactor.connectTCP(factory.proxy['host'], factory.proxy['port'], factory, timeout, bindAddress)
     else:
         if factory.isSecure:
             conn = reactor.connectSSL(factory.host, factory.port, factory, contextFactory, timeout, bindAddress)

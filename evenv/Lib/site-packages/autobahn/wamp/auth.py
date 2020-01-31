@@ -24,11 +24,8 @@
 #
 ###############################################################################
 
-from __future__ import absolute_import
-
 import os
 import base64
-import six
 import struct
 import time
 import binascii
@@ -96,14 +93,14 @@ def create_authenticator(name, **kwargs):
 
 # experimental authentication API
 class AuthAnonymous(object):
-    name = u'anonymous'
+    name = 'anonymous'
 
     def __init__(self, **kw):
         self._args = kw
 
     @property
     def authextra(self):
-        return self._args.get(u'authextra', dict())
+        return self._args.get('authextra', dict())
 
     def on_challenge(self, session, challenge):
         raise RuntimeError(
@@ -118,12 +115,12 @@ IAuthenticator.register(AuthAnonymous)
 
 
 class AuthTicket(object):
-    name = u'ticket'
+    name = 'ticket'
 
     def __init__(self, **kw):
         self._args = kw
         try:
-            self._ticket = self._args.pop(u'ticket')
+            self._ticket = self._args.pop('ticket')
         except KeyError:
             raise ValueError(
                 "ticket authentication requires 'ticket=' kwarg"
@@ -131,10 +128,10 @@ class AuthTicket(object):
 
     @property
     def authextra(self):
-        return self._args.get(u'authextra', dict())
+        return self._args.get('authextra', dict())
 
     def on_challenge(self, session, challenge):
-        assert challenge.method == u"ticket"
+        assert challenge.method == "ticket"
         return self._ticket
 
     def on_welcome(self, msg, authextra):
@@ -145,45 +142,45 @@ IAuthenticator.register(AuthTicket)
 
 
 class AuthCryptoSign(object):
-    name = u'cryptosign'
+    name = 'cryptosign'
 
     def __init__(self, **kw):
         # should put in checkconfig or similar
         for key in kw.keys():
-            if key not in [u'authextra', u'authid', u'authrole', u'privkey']:
+            if key not in ['authextra', 'authid', 'authrole', 'privkey']:
                 raise ValueError(
                     "Unexpected key '{}' for {}".format(key, self.__class__.__name__)
                 )
-        for key in [u'privkey', u'authid']:
+        for key in ['privkey', 'authid']:
             if key not in kw:
                 raise ValueError(
                     "Must provide '{}' for cryptosign".format(key)
                 )
         for key in kw.get('authextra', dict()):
-            if key not in [u'pubkey']:
+            if key not in ['pubkey']:
                 raise ValueError(
                     "Unexpected key '{}' in 'authextra'".format(key)
                 )
 
         from autobahn.wamp.cryptosign import SigningKey
         self._privkey = SigningKey.from_key_bytes(
-            binascii.a2b_hex(kw[u'privkey'])
+            binascii.a2b_hex(kw['privkey'])
         )
 
-        if u'pubkey' in kw.get(u'authextra', dict()):
-            pubkey = kw[u'authextra'][u'pubkey']
+        if 'pubkey' in kw.get('authextra', dict()):
+            pubkey = kw['authextra']['pubkey']
             if pubkey != self._privkey.public_key():
                 raise ValueError(
                     "Public key doesn't correspond to private key"
                 )
         else:
-            kw[u'authextra'] = kw.get(u'authextra', dict())
-            kw[u'authextra'][u'pubkey'] = self._privkey.public_key()
+            kw['authextra'] = kw.get('authextra', dict())
+            kw['authextra']['pubkey'] = self._privkey.public_key()
         self._args = kw
 
     @property
     def authextra(self):
-        return self._args.get(u'authextra', dict())
+        return self._args.get('authextra', dict())
 
     def on_challenge(self, session, challenge):
         return self._privkey.sign_challenge(session, challenge)
@@ -231,7 +228,7 @@ class AuthScram(object):
     NOTE: This is a prototype of a draft spec; see
     https://github.com/wamp-proto/wamp-proto/issues/135
     """
-    name = u'scram'
+    name = 'scram'
 
     def __init__(self, **kw):
         if not HAS_ARGON:
@@ -248,11 +245,11 @@ class AuthScram(object):
         if self._client_nonce is None:
             self._client_nonce = base64.b64encode(os.urandom(16)).decode('ascii')
         return {
-            u"nonce": self._client_nonce,
+            "nonce": self._client_nonce,
         }
 
     def on_challenge(self, session, challenge):
-        assert challenge.method == u"scram"
+        assert challenge.method == "scram"
         assert self._client_nonce is not None
         required_args = ['nonce', 'kdf', 'salt', 'iterations']
         optional_args = ['memory', 'channel_binding']
@@ -268,31 +265,31 @@ class AuthScram(object):
                     "WAMP-SCRAM challenge has unknown attribute '{}'".format(k)
                 )
 
-        channel_binding = challenge.extra.get(u'channel_binding', u'')
-        server_nonce = challenge.extra[u'nonce']  # base64
-        salt = challenge.extra[u'salt']  # base64
-        iterations = int(challenge.extra[u'iterations'])
-        memory = int(challenge.extra.get(u'memory', -1))
+        channel_binding = challenge.extra.get('channel_binding', '')
+        server_nonce = challenge.extra['nonce']  # base64
+        salt = challenge.extra['salt']  # base64
+        iterations = int(challenge.extra['iterations'])
+        memory = int(challenge.extra.get('memory', -1))
         password = self._args['password'].encode('utf8')  # supplied by user
         authid = saslprep(self._args['authid'])
-        algorithm = challenge.extra[u'kdf']
+        algorithm = challenge.extra['kdf']
         client_nonce = self._client_nonce
 
         self._auth_message = (
-            u"{client_first_bare},{server_first},{client_final_no_proof}".format(
-                client_first_bare=u"n={},r={}".format(authid, client_nonce),
-                server_first=u"r={},s={},i={}".format(server_nonce, salt, iterations),
-                client_final_no_proof=u"c={},r={}".format(channel_binding, server_nonce),
+            "{client_first_bare},{server_first},{client_final_no_proof}".format(
+                client_first_bare="n={},r={}".format(authid, client_nonce),
+                server_first="r={},s={},i={}".format(server_nonce, salt, iterations),
+                client_final_no_proof="c={},r={}".format(channel_binding, server_nonce),
             )
         ).encode('ascii')
 
-        if algorithm == u'argon2id-13':
+        if algorithm == 'argon2id-13':
             if memory == -1:
                 raise ValueError(
                     "WAMP-SCRAM 'argon2id-13' challenge requires 'memory' parameter"
                 )
             self._salted_password = _hash_argon2id13_secret(password, salt, iterations, memory)
-        elif algorithm == u'pbkdf2':
+        elif algorithm == 'pbkdf2':
             self._salted_password = _hash_pbkdf2_secret(password, salt, iterations)
         else:
             raise RuntimeError(
@@ -331,33 +328,33 @@ IAuthenticator.register(AuthScram)
 
 
 class AuthWampCra(object):
-    name = u'wampcra'
+    name = 'wampcra'
 
     def __init__(self, **kw):
         # should put in checkconfig or similar
         for key in kw.keys():
-            if key not in [u'authextra', u'authid', u'authrole', u'secret']:
+            if key not in ['authextra', 'authid', 'authrole', 'secret']:
                 raise ValueError(
                     "Unexpected key '{}' for {}".format(key, self.__class__.__name__)
                 )
-        for key in [u'secret', u'authid']:
+        for key in ['secret', 'authid']:
             if key not in kw:
                 raise ValueError(
                     "Must provide '{}' for wampcra".format(key)
                 )
 
         self._args = kw
-        self._secret = kw.pop(u'secret')
-        if not isinstance(self._secret, six.text_type):
+        self._secret = kw.pop('secret')
+        if not isinstance(self._secret, str):
             self._secret = self._secret.decode('utf8')
 
     @property
     def authextra(self):
-        return self._args.get(u'authextra', dict())
+        return self._args.get('authextra', dict())
 
     def on_challenge(self, session, challenge):
         key = self._secret.encode('utf8')
-        if u'salt' in challenge.extra:
+        if 'salt' in challenge.extra:
             key = derive_key(
                 key,
                 challenge.extra['salt'],
@@ -392,7 +389,7 @@ def generate_totp_secret(length=10):
        The length of the generated secret is ``length * 8 / 5`` octets.
     :rtype: unicode
     """
-    assert(type(length) in six.integer_types)
+    assert(type(length) == int)
     return base64.b32encode(os.urandom(length)).decode('ascii')
 
 
@@ -410,8 +407,8 @@ def compute_totp(secret, offset=0):
     :returns: TOTP for current time (+/- offset).
     :rtype: unicode
     """
-    assert(type(secret) == six.text_type)
-    assert(type(offset) in six.integer_types)
+    assert(type(secret) == str)
+    assert(type(offset) == int)
     try:
         key = base64.b32decode(secret)
     except TypeError:
@@ -419,9 +416,9 @@ def compute_totp(secret, offset=0):
     interval = offset + int(time.time()) // 30
     msg = struct.pack('>Q', interval)
     digest = hmac.new(key, msg, hashlib.sha1).digest()
-    o = 15 & (digest[19] if six.PY3 else ord(digest[19]))
+    o = 15 & (digest[19])
     token = (struct.unpack('>I', digest[o:o + 4])[0] & 0x7fffffff) % 1000000
-    return u'{0:06d}'.format(token)
+    return '{0:06d}'.format(token)
 
 
 @public
@@ -452,10 +449,10 @@ def check_totp(secret, ticket):
 
 @public
 def qrcode_from_totp(secret, label, issuer):
-    if type(secret) != six.text_type:
+    if type(secret) != str:
         raise Exception('secret must be of type unicode, not {}'.format(type(secret)))
 
-    if type(label) != six.text_type:
+    if type(label) != str:
         raise Exception('label must be of type unicode, not {}'.format(type(label)))
 
     try:
@@ -466,7 +463,7 @@ def qrcode_from_totp(secret, label, issuer):
     import io
     buffer = io.BytesIO()
 
-    data = pyqrcode.create(u'otpauth://totp/{}?secret={}&issuer={}'.format(label, secret, issuer))
+    data = pyqrcode.create('otpauth://totp/{}?secret={}&issuer={}'.format(label, secret, issuer))
     data.svg(buffer, omithw=True)
 
     return buffer.getvalue()
@@ -496,8 +493,8 @@ def pbkdf2(data, salt, iterations=1000, keylen=32, hashfunc=None):
     """
     if not (type(data) == bytes) or \
        not (type(salt) == bytes) or \
-       not (type(iterations) in six.integer_types) or \
-       not (type(keylen) in six.integer_types):
+       not (type(iterations) == int) or \
+       not (type(keylen) == int):
         raise ValueError("Invalid argument types")
 
     # justification: WAMP-CRA uses SHA256 and users shouldn't have any
@@ -541,23 +538,23 @@ def derive_key(secret, salt, iterations=1000, keylen=32):
     :return: The derived key in Base64 encoding.
     :rtype: bytes
     """
-    if not (type(secret) in [six.text_type, six.binary_type]):
+    if not (type(secret) in [str, bytes]):
         raise ValueError("'secret' must be bytes")
-    if not (type(salt) in [six.text_type, six.binary_type]):
+    if not (type(salt) in [str, bytes]):
         raise ValueError("'salt' must be bytes")
-    if not (type(iterations) in six.integer_types):
+    if not (type(iterations) == int):
         raise ValueError("'iterations' must be an integer")
-    if not (type(keylen) in six.integer_types):
+    if not (type(keylen) == int):
         raise ValueError("'keylen' must be an integer")
-    if type(secret) == six.text_type:
+    if type(secret) == str:
         secret = secret.encode('utf8')
-    if type(salt) == six.text_type:
+    if type(salt) == str:
         salt = salt.encode('utf8')
     key = pbkdf2(secret, salt, iterations, keylen)
     return binascii.b2a_base64(key).strip()
 
 
-WCS_SECRET_CHARSET = u"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+WCS_SECRET_CHARSET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 """
 The characters from which :func:`autobahn.wamp.auth.generate_wcs` generates secrets.
 """
@@ -580,8 +577,8 @@ def generate_wcs(length=14):
     :return: The generated secret. The length of the generated is ``length`` octets.
     :rtype: bytes
     """
-    assert(type(length) in six.integer_types)
-    return u"".join([random.choice(WCS_SECRET_CHARSET) for _ in range(length)]).encode('ascii')
+    assert(type(length) == int)
+    return "".join([random.choice(WCS_SECRET_CHARSET) for _ in range(length)]).encode('ascii')
 
 
 @public
@@ -598,11 +595,11 @@ def compute_wcs(key, challenge):
     :return: The authentication signature.
     :rtype: bytes
     """
-    assert(type(key) in [six.text_type, six.binary_type])
-    assert(type(challenge) in [six.text_type, six.binary_type])
-    if type(key) == six.text_type:
+    assert(type(key) in [str, bytes])
+    assert(type(challenge) in [str, bytes])
+    if type(key) == str:
         key = key.encode('utf8')
-    if type(challenge) == six.text_type:
+    if type(challenge) == str:
         challenge = challenge.encode('utf8')
     sig = hmac.new(key, challenge, hashlib.sha256).digest()
     return binascii.b2a_base64(sig).strip()
