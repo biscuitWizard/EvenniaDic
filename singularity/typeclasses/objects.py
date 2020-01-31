@@ -20,6 +20,7 @@ from evennia.utils.utils import (
     to_str,
 )
 from collections import defaultdict
+from evennia import TICKER_HANDLER as tickerhandler
 
 
 class Object(DefaultObject):
@@ -216,3 +217,66 @@ class Object(DefaultObject):
 
         return string
 
+class InstallationObject(Object):
+    @property
+    def used_by(self):
+        return self.db.used_by
+
+    @used_by.setter
+    def used_by(self, value):
+        self.db.used_by = value
+
+    def at_object_creation(self):
+        self.used_by = None
+
+
+class SimObject(InstallationObject):
+    @property
+    def resource_consumption(self):
+        return self.db.resource_consumption
+
+    @resource_consumption.setter
+    def resource_consumption(self, value):
+        self.db.resource_consumption = value
+
+    @property
+    def resource_generation(self):
+        return self.db.resource_generation
+
+    @resource_generation.setter
+    def resource_generation(self, value):
+        self.db.resource_generation = value
+
+    @property
+    def resource_storage(self):
+        return self.db.resource_storage
+
+    @resource_storage.setter
+    def resource_storage(self, value):
+        self.db.resource_storage = value
+
+    def at_object_creation(self):
+        self.resource_consumption = []
+        self.resource_generation = []
+        self.resource_storage = []
+
+        # Set up the timer to call ticks.
+        tickerhandler.add(5, self._on_tick)
+
+    def _on_tick(self):
+        if self.db.used_by is None or self.is_disabled:
+            return
+        self.pre_tick(self.db.used_by)
+        self.on_tick(self.db.used_by)
+
+    def pre_tick(self, parent):
+        for resource in self.resource_consumption:
+            amount = resource["amount"]
+            parent.adjust_resources(resource["key"], amount * -1)
+
+        for resource in self.resource_generation:
+            amount = resource["amount"] * self.get_efficiency()
+            parent.adjust_resources(resource["key"], amount)
+
+    def on_tick(self, parent):
+        pass

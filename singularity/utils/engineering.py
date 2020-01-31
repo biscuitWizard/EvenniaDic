@@ -5,6 +5,10 @@ def moles_to_pressure(moles, temperature, volume_litres):
     return round((moles * R_IDEAL_GAS_EQUATION * temperature) / volume_litres, 2)
 
 
+def tons_to_kilograms(tons):
+    return tons * 907.185
+
+
 def heat_capacity(gas_mixture):
     result = 0
     for gas in gas_mixture:

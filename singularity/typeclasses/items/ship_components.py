@@ -1,11 +1,10 @@
-from typeclasses.objects import Object
-from evennia import TICKER_HANDLER as tickerhandler
+from typeclasses.objects import SimObject
 from evennia.utils.utils import inherits_from
 from typeclasses.rooms import SimRoom
 from world.content.gases import R_IDEAL_GAS_EQUATION
 
 
-class ShipComponent(Object):
+class ShipComponent(SimObject):
     @property
     def armor(self):
         return self.db.armor
@@ -55,14 +54,6 @@ class ShipComponent(Object):
         self.db.is_disabled = value
 
     @property
-    def used_by(self):
-        return self.db.used_by
-
-    @used_by.setter
-    def used_by(self, value):
-        self.db.used_by = value
-
-    @property
     def temperature(self):
         return self.db.temperature
 
@@ -98,7 +89,6 @@ class ShipComponent(Object):
         self.tonnage = 0
         self.emission_frequency = 0
         self.emission_strength = 0
-        self.used_by = None
         self.is_disabled = False
 
         self.resource_consumption = []
@@ -106,9 +96,6 @@ class ShipComponent(Object):
         self.resource_storage = []
 
         self.armor = []
-
-        # Set up the timer to call ticks.
-        tickerhandler.add(5, self._on_tick)
 
     def at_install(self, ship):
         self.db.used_by = ship

@@ -3,7 +3,6 @@ from utils.terminal_menu import TerminalEvMenu
 from evennia.utils.evmenu import EvMenu
 from menus import generic_terminal
 
-
 class Machinery(Object):
     """
     Whether or not the item can be uninstalled from its room or stolen.
@@ -29,6 +28,11 @@ class Machinery(Object):
     def on_end_use(self, character):
         pass
 
+    def has_part(self, part_type):
+        pass
+
+    def get_parts(self part_type):
+        pass
 
 class Terminal(Machinery):
     @property
@@ -91,4 +95,3 @@ class GenericTerminal(Terminal):
             {"key": "ship_stat", "node": "node_program_ship"}
         ]
         self.menu_type = generic_terminal
-

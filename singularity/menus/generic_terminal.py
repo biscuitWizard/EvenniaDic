@@ -111,6 +111,7 @@ def node_program_helm(caller):
     |wDestination:|n        None Set
     |wTravel Est:|n         N/A
     |wMax G-Force:|n        1g
+    |wMax Speed:|n          3400 / 3400 km/s
     |wFuel Est:|n           N/A
     |wRoute Calculated:|n   |rNO|n
     
