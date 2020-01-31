@@ -87,7 +87,8 @@ class GenericTerminal(Terminal):
             {"key": "terminal", "node": "node_program_terminal"},
             {"key": "helm", "node": "node_program_helm"},
             {"key": "reactor", "node": "node_program_reactor"},
-            {"key": "sensors", "node": "node_program_sensors"}
+            {"key": "sensors", "node": "node_program_sensors"},
+            {"key": "ship_stat", "node": "node_program_ship"}
         ]
         self.menu_type = generic_terminal
 

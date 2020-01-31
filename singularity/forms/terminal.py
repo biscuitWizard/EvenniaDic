@@ -37,7 +37,7 @@ FORM = """
 def show(title_text, options_text, content_text):
     form = EvForm("forms/terminal.py")
     form.map(cells={
-        1: pad(title_text, width=76),
+        1: pad(title_text, width=70),
         2: options_text,
         3: content_text
     })
