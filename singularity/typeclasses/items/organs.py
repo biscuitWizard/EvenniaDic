@@ -1,4 +1,4 @@
-from typeclasses.objects import Object
+from typeclasses.objects import SimObject
 from evennia import TICKER_HANDLER as tickerhandler
 from evennia.utils.utils import inherits_from
 from typeclasses.items.health import Wound
@@ -9,7 +9,7 @@ import time
 from utils.engineering import moles_to_pressure
 
 
-class BodyPart(Object):
+class BodyPart(SimObject):
     @property
     def wounds(self):
         return self.db.wounds
@@ -25,38 +25,6 @@ class BodyPart(Object):
     @max_health.setter
     def max_health(self, value):
         self.db.max_health = value
-
-    @property
-    def used_by(self):
-        return self.db.used_by
-
-    @used_by.setter
-    def used_by(self, value):
-        self.db.used_by = value
-
-    @property
-    def resource_consumption(self):
-        return self.db.resource_consumption
-
-    @resource_consumption.setter
-    def resource_consumption(self, value):
-        self.db.resource_consumption = value
-
-    @property
-    def resource_generation(self):
-        return self.db.resource_generation
-
-    @resource_generation.setter
-    def resource_generation(self, value):
-        self.db.resource_generation = value
-
-    @property
-    def resource_storage(self):
-        return self.db.resource_storage
-
-    @resource_storage.setter
-    def resource_storage(self, value):
-        self.db.resource_storage = value
 
     @property
     def size(self):
@@ -90,25 +58,14 @@ class BodyPart(Object):
         super(BodyPart, self).at_object_creation()
         self.locks.add("puppet:false()")
         self.db.wounds = []
-        self.db.used_by = None
         self.db.max_health = 100
         self.db.size = 0
-
-        self.db.resource_consumption = []
-        self.db.resource_generation = []
-        self.db.resource_storage = []
 
         self.db.armor = []
         self.db.internal_categories = []
 
         # Set up the timer to call ticks.
         tickerhandler.add(5, self._on_tick)
-
-    def at_implant(self, character):
-        self.db.used_by = character
-
-    def at_remove(self, character):
-        self.db.used_by = None
 
     def _on_tick(self):
         if self.db.used_by is None:
@@ -117,18 +74,6 @@ class BodyPart(Object):
             return
         self.pre_tick(self.db.used_by)
         self.on_tick(self.db.used_by)
-
-    def pre_tick(self, character):
-        for resource in self.resource_consumption:
-            amount = resource["amount"]
-            character.body.adjust_resources(resource["key"], amount * -1)
-
-        for resource in self.resource_generation:
-            amount = resource["amount"] * self.get_efficiency()
-            character.body.adjust_resources(resource["key"], amount)
-
-    def on_tick(self, character):
-        pass
 
     def get_efficiency(self):
         damage = self.get_damage()

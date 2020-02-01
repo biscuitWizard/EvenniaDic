@@ -217,6 +217,7 @@ class Object(DefaultObject):
 
         return string
 
+
 class InstallationObject(Object):
     @property
     def used_by(self):
@@ -228,6 +229,12 @@ class InstallationObject(Object):
 
     def at_object_creation(self):
         self.used_by = None
+
+    def at_install(self, obj):
+        self.db.used_by = obj
+
+    def at_remove(self, obj):
+        self.db.used_by = None
 
 
 class SimObject(InstallationObject):
@@ -280,3 +287,6 @@ class SimObject(InstallationObject):
 
     def on_tick(self, parent):
         pass
+
+    def get_efficiency(self):
+        return 1

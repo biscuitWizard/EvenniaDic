@@ -1,6 +1,7 @@
-from typeclasses.objects import Object
+from typeclasses.objects import Object, SimObject
 from typeclasses.rooms import SimRoom
 from evennia import create_object
+from evennia.utils.utils import inherits_from
 
 from typeclasses.items.ship_components import LifeSupport
 
@@ -79,6 +80,9 @@ class Ship(Object):
     def can_leave_orbit(self):
         return False
 
+    def get_ship_components(self):
+        return filter(lambda x: inherits_from(x, ShipComponent) and x.used_by == self, self.contents)
+
 
 class ShipRoom(SimRoom):
     def at_object_creation(self):
@@ -87,3 +91,69 @@ class ShipRoom(SimRoom):
             {"key": "oxygen", "moles": 0.43997},
             {"key": "nitrogen", "moles": 1.36565}
         ]
+
+
+class ShipComponent(SimObject):
+    @property
+    def armor(self):
+        return self.db.armor
+
+    @armor.setter
+    def armor(self, value):
+        self.db.armor = value
+
+    @property
+    def tonnage(self):
+        return self.db.tonnage
+
+    @tonnage.setter
+    def tonnage(self, value):
+        self.db.tonnage = value
+
+    @property
+    def is_disabled(self):
+        return self.db.is_disabled
+
+    @is_disabled.setter
+    def is_disabled(self, value):
+        self.db.is_disabled = value
+
+    @property
+    def temperature(self):
+        return self.db.temperature
+
+    @temperature.setter
+    def temperature(self, value):
+        self.db.temperature = value
+
+    """
+    Emission strength in dbW
+    """
+    @property
+    def emission_strength(self):
+        return self.db.emission_strength
+
+    @emission_strength.setter
+    def emission_strength(self, value):
+        self.db.emission_strength = value
+
+    """
+    Emission frequency in Hz.
+    """
+    @property
+    def emission_frequency(self):
+        return self.db.emission_frequency
+
+    @emission_frequency.setter
+    def emission_frequency(self, value):
+        self.db.emission_frequency = value
+
+    def at_object_creation(self):
+        super(ShipComponent, self).at_object_creation()
+        self.locks.add("puppet:false()")
+        self.tonnage = 0
+        self.emission_frequency = 0
+        self.emission_strength = 0
+        self.is_disabled = False
+
+        self.armor = []

@@ -31,7 +31,7 @@ class Machinery(Object):
     def has_part(self, part_type):
         pass
 
-    def get_parts(self part_type):
+    def get_parts(self, part_type):
         pass
 
 class Terminal(Machinery):
