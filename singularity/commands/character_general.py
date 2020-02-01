@@ -3,9 +3,11 @@ from evennia.commands.default import general, help, admin, system
 from evennia.commands.default import building
 from evennia.commands.default import batchprocess
 from world.memory import MemoriesCmd, MemorizeCmd
+from typeclasses.exits import FlightExit
 
 from django.conf import settings
 from evennia.utils import utils
+from evennia.utils.utils import inherits_from
 
 COMMAND_DEFAULT_CLASS = utils.class_from_module(settings.COMMAND_DEFAULT_CLASS)
 
@@ -101,6 +103,19 @@ class CharacterGameCmdSet(CmdSet):
         # memories commands
         self.add(MemoriesCmd())
         self.add(MemorizeCmd())
+        self.add(CmdFly())
+
+
+class CmdFly(COMMAND_DEFAULT_CLASS):
+    key = "fly"
+
+    def func(self):
+        ship = self.caller.location.ship_parent
+        target = ship.search(self.args)
+        if not inherits_from(target, FlightExit):
+            self.caller.msg("That is not a valid direction to fly.")
+        ship.move_to(target.destination)
+        self.caller.msg("|cFrom outside the view-screen you see:|n %s" % target.destination.return_appearance(ship))
 
 
 class CmdEMScan(COMMAND_DEFAULT_CLASS):

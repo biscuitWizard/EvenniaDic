@@ -83,14 +83,26 @@ class Ship(Object):
     def get_ship_components(self):
         return filter(lambda x: inherits_from(x, ShipComponent) and x.used_by == self, self.contents)
 
+    def fly_to(self, exit):
+        pass
+
 
 class ShipRoom(SimRoom):
+    @property
+    def ship_parent(self):
+        return self.db.ship_parent
+
+    @ship_parent.setter
+    def ship_parent(self, value):
+        self.db.ship_parent = value
+
     def at_object_creation(self):
         super(ShipRoom, self).at_object_creation()
         self.atmosphere = [
             {"key": "oxygen", "moles": 0.43997},
             {"key": "nitrogen", "moles": 1.36565}
         ]
+        self.ship_parent = None
 
 
 class ShipComponent(SimObject):
