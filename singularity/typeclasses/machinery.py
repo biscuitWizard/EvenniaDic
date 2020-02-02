@@ -1,7 +1,7 @@
 from typeclasses.objects import Object
 from utils.terminal_menu import TerminalEvMenu
-from evennia.utils.evmenu import EvMenu
 from menus import generic_terminal
+
 
 class Machinery(Object):
     """
@@ -34,6 +34,7 @@ class Machinery(Object):
     def get_parts(self, part_type):
         pass
 
+
 class Terminal(Machinery):
     @property
     def used_by(self):
@@ -58,7 +59,8 @@ class Terminal(Machinery):
         self.menu_type = ''
 
     def on_begin_use(self, character):
-        TerminalEvMenu(character, self.menu_type)
+        self.used_by = character
+        TerminalEvMenu(self.used_by, self.menu_type, terminal=self)
 
 
 class GenericTerminal(Terminal):
@@ -84,14 +86,19 @@ class GenericTerminal(Terminal):
             {"key": "sample_data.nff", "size": 30, "desc": "sample data example"}
         ]
         self.programs = [
-            {"key": "notes", "node": "node_program_notes"},
-            {"key": "network", "node": "node_program_network"},
-            {"key": "mail", "node": "node_program_mail"},
-            {"key": "load disk", "node": "node_program_load_disk"},
-            {"key": "terminal", "node": "node_program_terminal"},
-            {"key": "helm", "node": "node_program_helm"},
-            {"key": "reactor", "node": "node_program_reactor"},
-            {"key": "sensors", "node": "node_program_sensors"},
-            {"key": "ship_stat", "node": "node_program_ship"}
+            {"key": "notes", "node": "node_program_notes", "data": "menus.programs.notes"},
+            {"key": "network", "node": "node_program_network", "data": "menus.programs.network"},
+            {"key": "mail", "node": "node_program_mail", "data": "menus.programs.mail"},
+            {"key": "load disk", "node": "node_program_load_disk", "data": "menus.programs.load_disk"},
+            {"key": "terminal", "node": "node_program_terminal", "data": "menus.programs.terminal"},
+            {"key": "helm", "node": "node_program_helm", "data": "menus.programs.ship_helm"},
+            {"key": "reactor", "node": "node_program_reactor", "data": "menus.programs.ship_reactor"},
+            {"key": "sensors", "node": "node_program_sensors", "data": "menus.programs.ship_sensors"},
+            {"key": "ship_stat", "node": "node_program_ship", "data": "menus.programs.ship_stat"}
         ]
         self.menu_type = generic_terminal
+
+    def launch_program(self, program):
+        TerminalEvMenu(self.used_by, program["data"],
+                       startnode=program["node"],
+                       terminal=self)

@@ -308,6 +308,9 @@ class SimRoom(Room):
                 self.atmosphere.remove(existing_gas)
 
 
+class SkyRoom(SimRoom):
+    pass
 
 
-
+class SpaceRoom(SimRoom):
+    pass
