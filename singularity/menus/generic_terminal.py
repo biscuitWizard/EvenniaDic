@@ -1,7 +1,8 @@
 def start(caller):
     text = "\n\nMake a selection from the left..."
     options = [
-        {"key": "files", "goto": "node_program_files"},
+        {"key": "files", "goto": (_launch_program, {"program": {"node": "node_program_files",
+                                                                "data": "menus.programs.files"}})},
     ]
 
     for program in caller.using.programs:
