@@ -1,5 +1,5 @@
-from world.stats import AttributeEnum, SkillEnum
-from world.content.terms import TERMS
+from world.enums import *
+from world.content.chargen import *
 import re
 
 
@@ -17,14 +17,151 @@ def start(caller):
         "stats": {},
         "age": 16,
         "is_psionic": False,
-        "current_term": 0
+        "current_term": 0,
+        "species": "human"
     }
     caller.ndb._menutree.terms = []
 
     for attribute in AttributeEnum:
         caller.ndb._menutree.character["stats"][attribute.name] = 20
 
-    return "begin when ready", {"key": "begin", "goto": "node_attributes"}
+    text = """
+    Welcome to Singularity's Character Generator!
+    
+    Have a paragraph about WTF is going on and some info about our game. Also here are some warnings
+    that you *definitely* shouldn't make multiple characters. And also here's some commands to
+    help get you more info! TBD!!!
+    
+    |yPlease do not make multiple characters to game chargen.|n
+    
+    When you're ready, go ahead and like.. type |ybegin|n to start CharGen.
+    """
+
+    return text, ({"key": "begin", "goto": "node_menu"})
+
+
+def node_menu(caller):
+    name = caller.ndb._menutree.character["full_name"]
+    if not name:
+        name = "Not Set"
+    species = caller.ndb._menutree.character["species"]
+    origin = caller.ndb._menutree.character["origin"]
+    if not origin:
+        origin = "Not Set"
+
+    d_b = "|gOk|n" if _is_basics_done(caller)[0] else "|rNo|n"
+    d_a = "|gOk|n" if _is_attributes_done(caller)[0] else "|rNo|n"
+    d_s = "|gOk|n" if _is_skills_done(caller)[0] else "|rNo|n"
+    d_l = "|gOk|n" if _is_life_done(caller)[0] else "|rNo|n"
+
+    text = """
+    Below are the general details of your character. Use the below commands
+    to navigate through chargen steps. Some steps may appear after others are completed.
+    
+    |wFull Name:|n       %s
+    |wSpecies:|n         %s
+    |wOrigin:|n          %s
+    
+    Completed:
+    |wBasics:|n          %s
+    |wAttributes:|n      %s
+    |wStarting Skills:|n %s
+    |wLife path:|n       %s    
+    """ % (name, species, origin, d_b, d_a, d_s, d_l)
+
+    options = (
+        {"key": "basics", "goto": "node_basics"},
+        {"key": "attributes", "goto": "node_attributes"},
+        {"key": "skills", "goto": "node_skills"}
+    )
+
+    return text, options
+
+
+def node_basics(caller):
+    character = caller.ndb._menutree.character
+    name = character["full_name"]
+    if not name:
+        name = "Not Set"
+    species = character["species"]
+    origin = character["origin"]
+    if not origin:
+        origin = "Not Set"
+    age = character["age"]
+    text = """
+    |wFull Name:|n       %s
+    |wAdolescent Age:|n  %s
+    |wSpecies:|n         %s
+    |wOrigin:|n          %s
+    
+    Type |yhelp <command>|n to get info on available choices.
+    """ % (name, age, species, origin)
+
+    options = (
+        {"key": "return", "goto": "node_menu"},
+        {"key": "full_name", "goto": ""},
+        {"key": "age", "goto": ""},
+        {"key": "species", "goto": ""},
+        {"key": "origin", "goto": ""}
+    )
+
+    return text, options
+
+
+def _is_attributes_done(caller):
+    if caller.ndb._menutree.points["attributes"] != 0:
+        return False, "All attribute points must be allocated."
+    return True, ""
+
+
+def _is_basics_done(caller):
+    character = caller.ndb._menutree.character
+    name = character["full_name"]
+    if not name or len(name) < 3:
+        return False, "Full name must have a value and be longer than 3 characters."
+    origin = character["origin"]
+    if not origin:
+        return False, "Must select an origin."
+    species_stats = next(s for s in CHARGEN["species"] if s["key"] == character["species"])
+    age = character["age"]
+    if age < species_stats["min_start_age"]:
+        return False, "Age must be equal to or more than %s." % species_stats["min_start_age"]
+    if age > species_stats["max_start_age"]:
+        return False, "Age must be equal to or less than %s." % species_stats["max_start_age"]
+    return True, ""
+
+
+def _is_skills_done(caller):
+    return False, ""
+
+
+def _is_life_done(caller):
+    return False, ""
+
+
+def node_skills(caller):
+    text = """
+    """
+
+    index = 0
+    stats = caller.ndb._menutree.character["stats"]
+    for skill in SkillEnum:
+        if index % 2 == 0:
+            text += "\n"
+
+        text += ("%s:" % skill.name).ljust(28)
+        value = stats.get(skill.name, 0)
+        text += str(value).rjust(9)
+        if index % 2 == 0:
+            text += "  "
+        index += 1
+
+    options = (
+        {"key": "return", "goto": "node_menu"},
+        {"key": "set", "goto": ""}
+    )
+
+    return text, options
 
 
 def node_attributes(caller):
@@ -41,7 +178,7 @@ def node_attributes(caller):
     # options = {"key": "_default", "goto": _node_attributes}
     # if caller.ndb._menutree.points["attributes"] == 0:
     options = ({"key": "_default", "goto": _node_attributes},
-               {"key": "next", "goto": "node_terms"})
+               {"key": "return", "goto": "node_menu"})
     return text, options
 
 

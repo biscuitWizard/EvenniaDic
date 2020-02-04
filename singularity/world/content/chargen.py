@@ -161,3 +161,158 @@ TERMS = [
     TERM_MERCHANT,
     TERM_SCIENTIST
 ]
+
+
+ORIGIN_NOBLE = {
+    "title": "Noble",
+    "description": "",
+    "species_restrictions": ["human"]
+}
+
+
+ORIGIN_EPSILON_CHILD = {
+    "title": "Epsilon Child",
+    "description": "",
+    "species_restrictions": ["human"]
+}
+
+
+ORIGIN_MILITARY_BRAT = {
+    "title": "Military Brat",
+    "description": "",
+    "species_restrictions": ["human"]
+}
+
+
+ORIGIN_BEAT_WITH_UGLY_STICK = {
+    "title": "Beat with an Ugly-Stick",
+    "description": "",
+    "species_restrictions": ["human"]
+}
+
+
+ORIGIN_BOOKWORM = {
+    "title": "Bookworm",
+    "description": "",
+    "species_restrictions": ["human"]
+}
+
+
+ORIGIN_FERAL_CHILD = {
+    "title": "Feral Child",
+    "description": "",
+    "species_restrictions": ["human"]
+}
+
+
+ORIGIN_BELTER = {
+    "title": "Belter",
+    "description": "",
+    "species_restrictions": ["human", "android"]
+}
+
+
+ORIGIN_SICKLY = {
+    "title": "Sickly",
+    "description": "",
+    "species_restrictions": ["human"]
+}
+
+
+ORIGIN_SAVANT = {
+    "title": "Savant",
+    "description": "",
+    "species_restrictions": ["human"]
+}
+
+
+ORIGIN_DRIFTER = {
+    "title": "Drifter",
+    "description": "",
+    "species_restrictions": ["human", "android"]
+}
+
+
+ORIGIN_THUG = {
+    "title": "Thug",
+    "description": "",
+    "species_restrictions": ["human", "android"]
+}
+
+
+ORIGIN_INHERITANCE = {
+    "title": "Inheritance",
+    "description": "",
+    "species_restrictions": ["human"]
+}
+
+
+ORIGIN_NEW_MODEL = {
+    "title": "New Model",
+    "description": "",
+    "species_restrictions": ["android"]
+}
+
+
+ORIGIN_PROTOTYPE = {
+    "title": "Prototype",
+    "description": "",
+    "species_restrictions": ["android"]
+}
+
+
+ORIGIN_FACTORY_MODEL = {
+    "title": "Factory Model",
+    "description": "",
+    "species_restrictions": ["android"]
+}
+
+
+ORIGIN_EVE = {
+    "title": "Eve",
+    "description": "",
+    "species_restrictions": ["android"]
+}
+
+
+ORIGINS = [
+    ORIGIN_BEAT_WITH_UGLY_STICK,
+    ORIGIN_BELTER,
+    ORIGIN_BOOKWORM,
+    ORIGIN_DRIFTER,
+    ORIGIN_EPSILON_CHILD,
+    ORIGIN_FERAL_CHILD,
+    ORIGIN_INHERITANCE,
+    ORIGIN_MILITARY_BRAT,
+    ORIGIN_NOBLE,
+    ORIGIN_SAVANT,
+    ORIGIN_SICKLY,
+    ORIGIN_THUG,
+
+    ORIGIN_PROTOTYPE,
+    ORIGIN_FACTORY_MODEL,
+    ORIGIN_NEW_MODEL,
+    ORIGIN_EVE
+]
+
+
+CHARGEN = {
+    "species": [
+        {
+            "key": "human",
+            "min_start_age": 16,
+            "max_start_age": 20,
+            "min_age": 18,
+            "max_terms": 13
+        },
+        {
+            "key": "android",
+            "min_start_age": 1,
+            "max_start_age": 5,
+            "min_age": 3,
+            "max_terms": 4
+        }
+    ],
+    "terms": TERMS,
+    "origins": ORIGINS
+}

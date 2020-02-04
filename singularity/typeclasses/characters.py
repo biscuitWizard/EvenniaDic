@@ -137,7 +137,7 @@ class Character(GenderCharacter):
     def using(self, value):
         self.db.using = value
 
-    """Base character typeclass for DIC.
+    """Base character typeclass for Singularity.
     This base Character typeclass should only contain things that would be
     common to NPCs, Mobs, Accounts, or anything else built off of it. Flags
     like "Aggro" would go further downstream.
