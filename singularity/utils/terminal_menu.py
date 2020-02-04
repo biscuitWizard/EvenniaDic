@@ -5,6 +5,8 @@ from forms import terminal
 
 class TerminalEvMenu(EvMenu):
     def node_formatter(self, nodetext, optionstext):
+        if self._quitting:
+            return ""
         return terminal.show("TEST", optionstext, nodetext)
 
     def options_formatter(self, optionlist):

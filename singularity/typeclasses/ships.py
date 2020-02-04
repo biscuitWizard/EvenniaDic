@@ -2,8 +2,8 @@ from typeclasses.objects import Object, SimObject
 from typeclasses.rooms import SimRoom
 from evennia import create_object
 from evennia.utils.utils import inherits_from
-
-from typeclasses.items.ship_components import LifeSupport
+from world.navigation import NavigationHandler
+from evennia.utils import lazy_property, utils
 
 
 class Ship(Object):
@@ -47,6 +47,10 @@ class Ship(Object):
     def rooms(self, value):
         self.db.rooms = value
 
+    @lazy_property
+    def navigation(self):
+        return NavigationHandler(self)
+
     def at_object_creation(self):
         super(Ship, self).at_object_creation()
 
@@ -58,15 +62,15 @@ class Ship(Object):
         self.is_item = False
 
         self.initialize_cockpit()
-        ls = create_object(LifeSupport, key="Nemesis Life Support", location=self)
+        ls = create_object("typeclasses.items.ship_components.LifeSupport", key="Nemesis Life Support", location=self)
         ls.used_by = self
 
     def initialize_cockpit(self):
         for room in self.rooms:
             room.destroy()
         self.rooms = []
-        cockpit = create_object(ShipRoom, key="Cockpit")
-        self.rooms.append(cockpit)
+
+        self.dig_room("Cockpit")
 
     def adjust_resources(self, key, amount):
         pass
@@ -85,6 +89,11 @@ class Ship(Object):
 
     def fly_to(self, exit):
         pass
+
+    def dig_room(self, name):
+        room = create_object(ShipRoom, key=name)
+        room.ship_parent = self
+        self.rooms.append(room)
 
 
 class ShipRoom(SimRoom):

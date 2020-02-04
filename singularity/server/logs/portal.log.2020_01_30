@@ -1,0 +1,60 @@
+20-01-30 15:47:36-08  |Portal| Loading c:\dev\evennia.singularity\evennia\evennia\server\portal\portal.py...
+20-01-30 15:47:38-08  |Portal| Loaded.
+20-01-30 15:47:38-08  |Portal| twistd 19.10.0 (c:\dev\evennia.singularity\evenv\scripts\python.exe 3.8.1) starting up.
+20-01-30 15:47:38-08  |Portal| reactor class: twisted.internet.selectreactor.SelectReactor.
+20-01-30 15:47:38-08  |Portal| AMP starting on 4006
+20-01-30 15:47:38-08  |Portal| Telnet starting on 4000
+20-01-30 15:47:38-08  |Portal| Websocket starting on 4002
+20-01-30 15:47:38-08  |Portal| Webserver-proxy starting on 4001
+20-01-30 15:47:38-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 15:47:43-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 15:57:30-08  |Portal| Unhandled error in Deferred:
+20-01-30 15:57:30-08  |Portal| Unhandled Error
+	Traceback (most recent call last):
+	Failure: twisted.conch.telnet.OptionRefused: twisted.conch.telnet.OptionRefused:b'"'
+	
+20-01-30 17:03:21-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 17:06:46-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 17:35:17-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 17:36:04-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 17:39:02-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 17:44:16-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 17:45:14-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 17:48:41-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 17:49:57-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 18:16:29-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 18:17:12-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 18:25:16-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 18:25:57-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 18:30:50-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 18:32:08-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 18:33:02-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 18:33:19-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 18:33:45-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 18:33:55-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 18:34:39-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 18:35:34-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 18:35:51-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 18:36:36-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 18:40:29-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 18:41:22-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 18:44:38-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 19:09:53-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 19:11:39-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 19:11:57-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 19:12:42-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 19:13:11-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 19:13:31-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 19:15:31-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 19:16:08-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 19:17:10-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 19:17:31-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 19:18:46-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 19:19:06-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 19:19:54-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 19:27:19-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 19:28:46-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 19:29:10-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 19:30:21-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 19:51:18-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']
+20-01-30 19:51:37-08  |Portal| Portal starting server ... ['c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\twistd.bat', '--python=c:\\dev\\evennia.singularity\\evennia\\evennia\\server\\server.py']

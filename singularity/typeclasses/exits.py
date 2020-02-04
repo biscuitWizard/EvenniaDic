@@ -122,5 +122,6 @@ class Exit(SlowExit):
 
     pass
 
-class FlightExit(Exit):
+
+class FlightExit(SlowExit):
     pass
