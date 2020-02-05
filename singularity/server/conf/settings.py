@@ -46,6 +46,8 @@ PROTOTYPE_MODULES = ["world.prototypes",
                      "world.content.rooms"
                      ]
 
+START_LOCATION = "#3"
+
 ######################################################################
 # Settings given in secret_settings.py override those in this file.
 ######################################################################
