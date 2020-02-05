@@ -12,8 +12,87 @@ class Sensors(ShipComponent):
     pass
 
 
-class FuelTank(ShipComponent):
-    pass
+class StorageTank(ShipComponent):
+    @property
+    def volume(self):
+        return self.db.volume
+
+    @volume.setter
+    def volume(self, value):
+        self.db.volume = value
+
+    @property
+    def max_pressure(self):
+        return self.db.max_pressure
+
+    @max_pressure.setter
+    def max_pressure(self, value):
+        self.db.max_pressure = value
+
+    @property
+    def internal_temperature(self):
+        return self.db.internal_temperature
+
+    @internal_temperature.setter
+    def internal_temperature(self, value):
+        self.db.internal_temperature = value
+
+
+class HeatPump(StorageTank):
+    @property
+    def pump_max_temperature(self):
+        return self.db.pump_max_temperature
+
+    @pump_max_temperature.setter
+    def pump_max_temperature(self, value):
+        self.db.pump_max_temperature = value
+
+    @property
+    def is_auto(self):
+        """
+        The mode setting for this heatpump. Manual or Auto. If Auto,
+        attempt to automatically dump heat near max temp.
+        :return: Boolean
+        """
+        return self.db.is_auto
+
+    @is_auto.setter
+    def is_auto(self, value):
+        self.db.is_auto = value
+
+    @property
+    def desired_temperature(self):
+        """
+        The desired temperature for the ship. The heat pump will constantly
+        strive to reach this thermostasis.
+        :return: Number in Kelvin
+        """
+        return self.db.desired_temperature
+
+    @desired_temperature.setter
+    def desired_temperature(self, value):
+        self.db.desired_temperature = value
+
+    @property
+    def heat_coefficient(self):
+        """
+        How efficient/how many kelvin the HeatPump can move every tick.
+        :return: Presumably a number between 0.05-10 is preferred.
+        """
+        return self.db.heat_coefficient
+
+    @heat_coefficient.setter
+    def heat_coefficient(self, value):
+        self.db.heat_coefficient = value
+
+    def get_kelvin_moved(self, source_temp):
+        internal_temperature = max(0.0000001, self.internal_temperature) # Divide by 0 protection
+        base_efficiency = min(3, self.pump_max_temperature / internal_temperature) * self.get_efficiency()
+
+        heat_possible = base_efficiency * self.heat_coefficient
+        desired_moved = max(0, source_temp - self.desired_temperature)
+
+        return min(heat_possible, desired_moved)
 
 
 class Radiator(ShipComponent):
