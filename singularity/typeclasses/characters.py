@@ -166,6 +166,8 @@ class Character(GenderCharacter):
         self.cmdset.add(CharacterGameCmdSet, permanent=True)
 
         self.reset_stats()
+        if self.id == 2:
+            return
         self.apply_species(SPECIES_HUMAN)
 
     def can_act(self):

@@ -1,7 +1,9 @@
 from world.enums import *
+from world.content.species import SPECIES
 from world.content.chargen import *
+from evennia.utils.evmenu import get_input
+from evennia.utils.utils import list_to_string
 import re
-
 
 def start(caller):
     if not caller:
@@ -75,6 +77,11 @@ def node_menu(caller):
         {"key": "skills", "goto": "node_skills"}
     )
 
+    if _is_basics_done(caller)[0] and _is_attributes_done(caller)[0] and _is_skills_done(caller)[0]:
+        options.append({"key": "life path", "goto": "node_terms"})
+        if _is_life_done(caller)[0]:
+            options.append({"key": "finish", "goto": "node_finish"})
+
     return text, options
 
 
@@ -99,13 +106,63 @@ def node_basics(caller):
 
     options = (
         {"key": "return", "goto": "node_menu"},
-        {"key": "full_name", "goto": ""},
-        {"key": "age", "goto": ""},
-        {"key": "species", "goto": ""},
-        {"key": "origin", "goto": ""}
+        {"key": "full_name", "goto": _node_basics_full_name},
+        {"key": "age", "goto": _node_basics_age},
+        {"key": "species", "goto": _node_basics_species},
+        {"key": "origin", "goto": _node_basics_origin}
     )
 
     return text, options
+
+
+def _node_basics_full_name(caller):
+    def callback(caller, prompt, user_input):
+        caller.msg("You set your character's full name to: %s." % user_input)
+        caller.ndb._menutree.character["full_name"] = user_input
+    get_input(caller, ">> Enter your character's full name.", callback)
+
+
+def _node_basics_age(caller):
+    def callback(caller, prompt, user_input):
+        species = next(s for s in CHARGEN["species"] if s["key"] == caller.ndb._menutree.character["species"])
+        if not user_input.is_integer() \
+                or int(user_input) < species["min_start_age"] \
+                or int(user_input) > species["max_start_age"]:
+            caller.msg("Age must be a valid number between %s and %s."
+                       % (species["min_start_age"], species["max_start_age"]))
+            return
+        caller.msg("You set your character's age to: %s." % user_input)
+        caller.ndb._menutree.character["age"] = int(user_input)
+    get_input(caller, ">> Enter your character's age.", callback)
+
+
+def _node_basics_species(caller):
+    def callback(caller, prompt, user_input):
+        character = caller.ndb._menutree.character
+        species = next((s for s in SPECIES if s["title"].lower().startswith(user_input.lower())), None)
+        if not species:
+            caller.msg("'%s' is not a valid species. Valid species: |wHuman|n, and |wAndroid.|n" % user_input)
+            return
+        species_chargen = next(s for s in CHARGEN["species"] if s["key"] == species["key"])
+        caller.msg("You set your character's species to: %s." % species["title"])
+        character["age"] = species_chargen["min_age"]
+        character["origin"] = None
+        character["species"] = species["key"]
+    get_input(caller, ">> Enter your character's species.", callback)
+
+
+def _node_basics_origin(caller):
+    def callback(caller, prompt, user_input):
+        character = caller.ndb._menutree.character
+        origins = filter(lambda o: character["species"] in o["species_restrictions"], CHARGEN["origins"])
+        origin = next((o for o in origins if o["title"].lower().startswith(user_input.lower())), None)
+        if not origin:
+            caller.msg("'%s' is not a valid origin choice. Valid choices: %s"
+                       % (user_input, list_to_string(map(lambda o: o["title"], origins))))
+            return
+        caller.msg("You set your character's origin to: %s." % user_input)
+        character["origin"] = origin["key"]
+    get_input(caller, ">> Enter your character's origin.", callback)
 
 
 def _is_attributes_done(caller):
@@ -330,6 +387,13 @@ def adjust_attribute(caller, match, is_add):
     msg += " for %s points." % cost
     success(caller, msg)
     return "node_attributes"
+
+
+def node_finish(caller):
+    text = ""
+    options = ()
+
+    return text, options
 
 
 def success(caller, msg):

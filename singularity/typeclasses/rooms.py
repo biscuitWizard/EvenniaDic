@@ -50,7 +50,7 @@ class Room(DefaultRoom):
         for con in visible:
             key = con.get_display_name(looker)
             if con.destination:
-                exits.append(key)
+                exits.append(con)
             elif con.has_account:
                 users.append("|c%s|n" % key)
             else:
@@ -62,7 +62,10 @@ class Room(DefaultRoom):
         if desc:
             string += "%s" % desc
         if exits:
-            string += "\n|wExits:|n " + list_to_string(exits)
+            string += "\n"
+            for exit in exits:
+                string += exit.get_display_text() + ". "
+            # string += "\n|wExits:|n " + list_to_string(exits)
 
         return string
 

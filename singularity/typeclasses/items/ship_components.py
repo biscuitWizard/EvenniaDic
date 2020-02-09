@@ -1,7 +1,7 @@
 from typeclasses.ships import ShipComponent
 from evennia.utils.utils import inherits_from
 from typeclasses.rooms import SimRoom
-from world.content.gases import R_IDEAL_GAS_EQUATION
+from world.content.gases import R_IDEAL_GAS_EQUATION, GASES, CO2
 
 
 class PowerPlant(ShipComponent):
@@ -221,7 +221,7 @@ class MainEngine(ShipComponent):
         return (self.tonnage / self.used_by.gross_tonnage) \
                * self.throttle \
                * self.thrust_power \
-               * (CO2["molar_mass"] / self.propellant["molar_mass"])
+               * (CO2["molar_mass"] / self.propellant["molar_mass"]) \
                * self.get_efficiency()
 
     def calc_fuel_consumption(self):

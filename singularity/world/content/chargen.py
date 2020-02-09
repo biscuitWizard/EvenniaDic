@@ -1,12 +1,19 @@
-from world.stats import AttributeEnum, SkillEnum
+from world.enums import *
+
+
+TERM_UNIVERSITY = {
+    "title": "University"
+}
 
 
 TERM_AGENT = {
     "title": "Agent",
+    "advancements": [SkillEnum.Firearms, SkillEnum.Drive, SkillEnum.Brawl,
+                     AttributeEnum.Reaction, AttributeEnum.Endurance, AttributeEnum.Intelligence],
     "assignments": [
         {
             "title": "Law Enforcement",
-            "skills": [SkillEnum.Forensics, SkillEnum.Stealth, SkillEnum.Brawl, SkillEnum.NonLethalWeapons],
+            "advancements": [SkillEnum.Forensics, SkillEnum.Stealth, SkillEnum.Brawl, SkillEnum.NonLethalWeapons],
             "ranks": [
                     {"title": "Rookie", "bonus": None},
                     {"title": "Corporal", "bonus": SkillEnum.Stealth},
@@ -15,11 +22,12 @@ TERM_AGENT = {
                     {"title": "Lieutenant", "bonus": SkillEnum.Forensics},
                     {"title": "Chief", "bonus": SkillEnum.Deceive},
                     {"title": "Commissioner", "bonus": AttributeEnum.Savvy},
-            ]
+            ],
+            "description": "You are a detective, or police officer."
         },
         {
             "title": "Intelligence",
-            "skills": [SkillEnum.Forensics, SkillEnum.Deceive, SkillEnum.Stealth, SkillEnum.Software],
+            "advancements": [SkillEnum.Forensics, SkillEnum.Deceive, SkillEnum.Stealth, SkillEnum.Software],
             "ranks": [
                 {"title": "Rookie", "bonus": None},
                 {"title": "Agent", "bonus": SkillEnum.Deceive},
@@ -28,11 +36,12 @@ TERM_AGENT = {
                 {"title": "Special Agent", "bonus": SkillEnum.Firearms},
                 {"title": "Assistant Director", "bonus": None},
                 {"title": "Director", "bonus": None},
-            ]
+            ],
+            "description": ""
         },
         {
             "title": "Corporate",
-            "skills": [SkillEnum.Forensics, SkillEnum.Hardware, SkillEnum.Stealth, SkillEnum.Deceive],
+            "advancements": [SkillEnum.Forensics, SkillEnum.Hardware, SkillEnum.Stealth, SkillEnum.Deceive],
             "ranks": [
                 {"title": "Rookie", "bonus": None},
                 {"title": "Agent", "bonus": SkillEnum.Deceive},
@@ -41,7 +50,8 @@ TERM_AGENT = {
                 {"title": "Special Agent", "bonus": SkillEnum.Firearms},
                 {"title": "Assistant Director", "bonus": None},
                 {"title": "Director", "bonus": None},
-            ]
+            ],
+            "description": ""
         }
     ]
 }

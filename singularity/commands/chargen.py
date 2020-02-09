@@ -1,6 +1,7 @@
 from evennia import DefaultObject, default_cmds, CmdSet
 from evennia.utils.evmenu import EvMenu
-from utils.evmenu import DICEvMenu
+from menus import chargen
+from utils.evmenu import MyEvMenu
 
 
 class ChargenCmdSet(CmdSet):
@@ -16,4 +17,4 @@ class BeginChargen(default_cmds.MuxCommand):
     key = "chargen"
 
     def func(self):
-        DICEvMenu(self.caller, "world.chargen")
+        MyEvMenu(self.caller, chargen, startnode="start")

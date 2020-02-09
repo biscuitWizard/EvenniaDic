@@ -120,7 +120,22 @@ class Exit(SlowExit):
                                         defined, in which case that will simply be echoed.
     """
 
-    pass
+    def at_object_creation(self):
+        """
+        Called the very first time the exit is created.
+        """
+        super().at_object_creation()
+        self.db.odesc = None
+        self.db.show_odesc_prealias = True
+
+    def get_display_text(self):
+        text = "|w%s|n" % self.name
+        if self.db.odesc:
+            if self.db.show_odesc_prealias:
+                text = self.db.odesc + " " + text
+            else:
+                text += " " + self.db.odesc
+        return text
 
 
 class FlightExit(SlowExit):
